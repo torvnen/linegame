@@ -5,21 +5,33 @@ const doNTimes = (f: () => any, n: Number): void => {
 class Game {
   static boardW = 600;
   static boardH = 600;
-  private state = Array<Dot>();
-  board: HTMLCanvasElement;
-  boardContext: CanvasRenderingContext2D;
+  private board = Array<Array<Dot>>();
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
 
   constructor(private container: HTMLElement | null) {
     if (!container) throw new Error("No main found");
-    this.board = document.createElement("canvas");
-    this.board.width = Game.boardW;
-    this.board.height = Game.boardH;
-    const ctx = this.board.getContext("2d");
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = Game.boardW;
+    this.canvas.height = Game.boardH;
+    const ctx = this.canvas.getContext("2d");
     if (!ctx) throw new Error("Context could not be created");
-    this.boardContext = ctx;
-    this.boardContext.strokeStyle = "#000";
+    this.context = ctx;
+    this.context.strokeStyle = "#000";
     container.innerHTML = "";
-    container.appendChild(this.board);
+    container.appendChild(this.canvas);
+  }
+
+  flattenBoard(): Array<Dot> {
+    const flat = Array<Dot>();
+    this.board.forEach((dArr) => dArr.forEach((d) => flat.push(d)));
+    return flat;
+  }
+
+  addToBoard(dot: Dot) {
+    if (!Array.isArray(this.board[dot.xIndex]))
+      this.board[dot.xIndex] = Array<Dot>();
+    this.board[dot.xIndex][dot.yIndex] = dot;
   }
 
   async createBoard() {
@@ -31,9 +43,7 @@ class Game {
       activated: Boolean = false,
       delayMs: number = 20
     ) => {
-      this.state.push(
-        new Dot(xIndex, yIndex).draw(this.boardContext, activated)
-      );
+      this.addToBoard(new Dot(xIndex, yIndex).draw(this.context, activated));
       await new Promise((r: any) => setTimeout(r, delayMs));
     };
 
@@ -76,7 +86,7 @@ class Game {
     await draw3OrNDots("right");
     await draw3OrNDots("up");
 
-    const coordsWithFilledDots = this.state.map((dot) => [
+    const coordsWithFilledDots = this.flattenBoard().map((dot) => [
       dot.xIndex,
       dot.yIndex,
     ]);
@@ -88,6 +98,12 @@ class Game {
         else await drawWithDelay(x, y, false, 6);
       }
     }
+  }
+
+  toggleDotActivated(xIndex: number, yIndex: number, activated: Boolean) {
+    if (!Array.isArray(this.board[xIndex])) return;
+    if (!this.board[xIndex][yIndex]) return;
+    this.board[xIndex][yIndex].draw(this.context, activated);
   }
 }
 
@@ -133,7 +149,7 @@ class Dot {
     path.arc(
       this.centerX(),
       this.centerY(),
-      activated ? Dot.radius() : (Dot.radius() / 3.3),
+      activated ? Dot.radius() : Dot.radius() / 3.3,
       0,
       360
     );
@@ -144,4 +160,7 @@ class Dot {
 
 const game = new Game(document.querySelector("main"));
 
-game.createBoard();
+game.createBoard().then(() => {
+  // game.toggleDotActivated(2, 2, true);
+  // game.toggleDotActivated(2, 5, false);
+});

@@ -42,20 +42,30 @@ var doNTimes = function (f, n) {
 var Game = /** @class */ (function () {
     function Game(container) {
         this.container = container;
-        this.state = Array();
+        this.board = Array();
         if (!container)
             throw new Error("No main found");
-        this.board = document.createElement("canvas");
-        this.board.width = Game.boardW;
-        this.board.height = Game.boardH;
-        var ctx = this.board.getContext("2d");
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = Game.boardW;
+        this.canvas.height = Game.boardH;
+        var ctx = this.canvas.getContext("2d");
         if (!ctx)
             throw new Error("Context could not be created");
-        this.boardContext = ctx;
-        this.boardContext.strokeStyle = "#000";
+        this.context = ctx;
+        this.context.strokeStyle = "#000";
         container.innerHTML = "";
-        container.appendChild(this.board);
+        container.appendChild(this.canvas);
     }
+    Game.prototype.flattenBoard = function () {
+        var flat = Array();
+        this.board.forEach(function (dArr) { return dArr.forEach(function (d) { return flat.push(d); }); });
+        return flat;
+    };
+    Game.prototype.addToBoard = function (dot) {
+        if (!Array.isArray(this.board[dot.xIndex]))
+            this.board[dot.xIndex] = Array();
+        this.board[dot.xIndex][dot.yIndex] = dot;
+    };
     Game.prototype.createBoard = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, xIndex, yIndex, drawWithDelay, draw3OrNDots, coordsWithFilledDots, _loop_1, y;
@@ -71,7 +81,7 @@ var Game = /** @class */ (function () {
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            this.state.push(new Dot(xIndex, yIndex).draw(this.boardContext, activated));
+                                            this.addToBoard(new Dot(xIndex, yIndex).draw(this.context, activated));
                                             return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, delayMs); })];
                                         case 1:
                                             _a.sent();
@@ -158,7 +168,7 @@ var Game = /** @class */ (function () {
                         return [4 /*yield*/, draw3OrNDots("up")];
                     case 12:
                         _b.sent();
-                        coordsWithFilledDots = this.state.map(function (dot) { return [
+                        coordsWithFilledDots = this.flattenBoard().map(function (dot) { return [
                             dot.xIndex,
                             dot.yIndex,
                         ]; });
@@ -212,6 +222,13 @@ var Game = /** @class */ (function () {
             });
         });
     };
+    Game.prototype.toggleDotActivated = function (xIndex, yIndex, activated) {
+        if (!Array.isArray(this.board[xIndex]))
+            return;
+        if (!this.board[xIndex][yIndex])
+            return;
+        this.board[xIndex][yIndex].draw(this.context, activated);
+    };
     Game.boardW = 600;
     Game.boardH = 600;
     return Game;
@@ -248,7 +265,7 @@ var Dot = /** @class */ (function () {
         }
         else
             boardContext.fillStyle = "#fff";
-        path.arc(this.centerX(), this.centerY(), activated ? Dot.radius() : (Dot.radius() / 3.3), 0, 360);
+        path.arc(this.centerX(), this.centerY(), activated ? Dot.radius() : Dot.radius() / 3.3, 0, 360);
         boardContext.stroke(path);
         return this;
     };
@@ -259,4 +276,7 @@ var Dot = /** @class */ (function () {
     return Dot;
 }());
 var game = new Game(document.querySelector("main"));
-game.createBoard();
+game.createBoard().then(function () {
+    // game.toggleDotActivated(2, 2, true);
+    // game.toggleDotActivated(2, 5, false);
+});
