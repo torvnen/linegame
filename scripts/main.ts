@@ -28,6 +28,19 @@ class Game {
     return flat;
   }
 
+  getDotAt(x: number, y: number): Dot | null {
+    const dots = this.flattenBoard();
+    return dots.find(
+      (d) => {
+        const [x1, x2] = [d.startX(), d.endX()]
+        if (x1 > x || x2 < x) return false
+        const [y1, y2] = [d.startY(), d.endY()]
+        if (y1 > y || y2 < y) return false
+        return true
+      }
+    );
+  }
+
   addToBoard(dot: Dot) {
     if (!Array.isArray(this.board[dot.xIndex]))
       this.board[dot.xIndex] = Array<Dot>();
@@ -41,9 +54,12 @@ class Game {
       xIndex: number,
       yIndex: number,
       activated: Boolean = false,
+      locked: Boolean = false,
       delayMs: number = 20
     ) => {
-      this.addToBoard(new Dot(xIndex, yIndex).draw(this.context, activated));
+      this.addToBoard(
+        new Dot(xIndex, yIndex, locked).draw(this.context, activated)
+      );
       await new Promise((r: any) => setTimeout(r, delayMs));
     };
 
@@ -67,7 +83,7 @@ class Game {
             xIndex--;
             break;
         }
-        await drawWithDelay(xIndex, yIndex, true);
+        await drawWithDelay(xIndex, yIndex, true, true);
       }
       return new Promise((r: any) => r());
     };
@@ -95,7 +111,7 @@ class Game {
       for (let x = 0; x < 14; x++) {
         if (coordsWithFilledDots.some((c) => c[0] === x && c[1] === y))
           continue;
-        else await drawWithDelay(x, y, false, 6);
+        else await drawWithDelay(x, y, false, false, 6);
       }
     }
   }
@@ -114,10 +130,13 @@ class Dot {
   static squareSideLength = (): number => Dot.diameter + Dot.padding() * 2;
   xIndex: number;
   yIndex: number;
+  isActivated: Boolean = false;
+  isLocked: Boolean;
 
-  constructor(xIndex: number, yIndex: number) {
+  constructor(xIndex: number, yIndex: number, locked: Boolean = false) {
     this.xIndex = xIndex;
     this.yIndex = yIndex;
+    this.isLocked = locked;
   }
 
   startX = (withPadding: Boolean = true): number =>
@@ -126,9 +145,13 @@ class Dot {
   startY = (withPadding: Boolean = true): number =>
     this.yIndex * (Dot.diameter + Dot.padding() * 2) +
     (withPadding ? Dot.padding() : 0);
+  endX = (withPadding: Boolean = true): number => this.startX(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
+  endY = (withPadding: Boolean = true): number => this.startY(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
   centerX = (): number => this.startX() + Dot.padding() + Dot.radius();
   centerY = (): number => this.startY() + Dot.padding() + Dot.radius();
-
+  equals(other: Dot): Boolean {
+    return (!!other && other.xIndex === this.xIndex && other.yIndex === this.yIndex)
+  }
   clear(boardContext: CanvasRenderingContext2D): void {
     boardContext.clearRect(
       this.startX(),
@@ -138,14 +161,19 @@ class Dot {
     );
   }
 
+  lock(): Dot {
+    this.isLocked = true;
+    return this;
+  }
+
   draw(boardContext: CanvasRenderingContext2D, activated: Boolean = true): Dot {
     this.clear(boardContext);
     const path = new Path2D();
     console.debug(`Drawing at (${this.centerX()}, ${this.centerY()})`);
     console.count("drawn dots");
-    if (!activated) {
-      boardContext.fillStyle = "#000";
-    } else boardContext.fillStyle = "#fff";
+    if (activated) {
+      this.isActivated = true;
+    }
     path.arc(
       this.centerX(),
       this.centerY(),
@@ -161,6 +189,19 @@ class Dot {
 const game = new Game(document.querySelector("main"));
 
 game.createBoard().then(() => {
+  let dot: Dot;
+  game.canvas.onmousemove = function (e: MouseEvent) {
+    const bounds = (e.target as HTMLCanvasElement).getBoundingClientRect();
+    const [x, y] = [e.clientX - bounds.left, e.clientY - bounds.top];
+    const nextDot = game.getDotAt(x, y);
+    //if (!!nextDot) console.debug(`Found a dot at index [%i, %i]`, nextDot.xIndex, nextDot.yIndex)
+    if (!!dot && !dot.equals(nextDot) && !dot.isLocked) 
+      game.toggleDotActivated(dot.xIndex, dot.yIndex, false);
+    if (!!nextDot) {
+      game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);      
+    }
+    dot = nextDot;
+  };
   // game.toggleDotActivated(2, 2, true);
   // game.toggleDotActivated(2, 5, false);
 });

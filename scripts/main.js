@@ -61,6 +61,18 @@ var Game = /** @class */ (function () {
         this.board.forEach(function (dArr) { return dArr.forEach(function (d) { return flat.push(d); }); });
         return flat;
     };
+    Game.prototype.getDotAt = function (x, y) {
+        var dots = this.flattenBoard();
+        return dots.find(function (d) {
+            var _a = [d.startX(), d.endX()], x1 = _a[0], x2 = _a[1];
+            if (x1 > x || x2 < x)
+                return false;
+            var _b = [d.startY(), d.endY()], y1 = _b[0], y2 = _b[1];
+            if (y1 > y || y2 < y)
+                return false;
+            return true;
+        });
+    };
     Game.prototype.addToBoard = function (dot) {
         if (!Array.isArray(this.board[dot.xIndex]))
             this.board[dot.xIndex] = Array();
@@ -74,14 +86,15 @@ var Game = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         _a = [5, 2], xIndex = _a[0], yIndex = _a[1];
-                        drawWithDelay = function (xIndex, yIndex, activated, delayMs) {
+                        drawWithDelay = function (xIndex, yIndex, activated, locked, delayMs) {
                             if (activated === void 0) { activated = false; }
+                            if (locked === void 0) { locked = false; }
                             if (delayMs === void 0) { delayMs = 20; }
                             return __awaiter(_this, void 0, void 0, function () {
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            this.addToBoard(new Dot(xIndex, yIndex).draw(this.context, activated));
+                                            this.addToBoard(new Dot(xIndex, yIndex, locked).draw(this.context, activated));
                                             return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, delayMs); })];
                                         case 1:
                                             _a.sent();
@@ -116,7 +129,7 @@ var Game = /** @class */ (function () {
                                                     xIndex--;
                                                     break;
                                             }
-                                            return [4 /*yield*/, drawWithDelay(xIndex, yIndex, true)];
+                                            return [4 /*yield*/, drawWithDelay(xIndex, yIndex, true, true)];
                                         case 2:
                                             _a.sent();
                                             _a.label = 3;
@@ -183,7 +196,7 @@ var Game = /** @class */ (function () {
                                                     case 0:
                                                         if (!coordsWithFilledDots.some(function (c) { return c[0] === x && c[1] === y; })) return [3 /*break*/, 1];
                                                         return [2 /*return*/, "continue"];
-                                                    case 1: return [4 /*yield*/, drawWithDelay(x, y, false, 6)];
+                                                    case 1: return [4 /*yield*/, drawWithDelay(x, y, false, false, 6)];
                                                     case 2:
                                                         _a.sent();
                                                         _a.label = 3;
@@ -234,8 +247,10 @@ var Game = /** @class */ (function () {
     return Game;
 }());
 var Dot = /** @class */ (function () {
-    function Dot(xIndex, yIndex) {
+    function Dot(xIndex, yIndex, locked) {
         var _this = this;
+        if (locked === void 0) { locked = false; }
+        this.isActivated = false;
         this.startX = function (withPadding) {
             if (withPadding === void 0) { withPadding = true; }
             return _this.xIndex * (Dot.diameter + Dot.padding() * 2) +
@@ -246,13 +261,29 @@ var Dot = /** @class */ (function () {
             return _this.yIndex * (Dot.diameter + Dot.padding() * 2) +
                 (withPadding ? Dot.padding() : 0);
         };
+        this.endX = function (withPadding) {
+            if (withPadding === void 0) { withPadding = true; }
+            return _this.startX(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
+        };
+        this.endY = function (withPadding) {
+            if (withPadding === void 0) { withPadding = true; }
+            return _this.startY(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
+        };
         this.centerX = function () { return _this.startX() + Dot.padding() + Dot.radius(); };
         this.centerY = function () { return _this.startY() + Dot.padding() + Dot.radius(); };
         this.xIndex = xIndex;
         this.yIndex = yIndex;
+        this.isLocked = locked;
     }
+    Dot.prototype.equals = function (other) {
+        return (!!other && other.xIndex === this.xIndex && other.yIndex === this.yIndex);
+    };
     Dot.prototype.clear = function (boardContext) {
         boardContext.clearRect(this.startX(), this.startY(), Dot.squareSideLength(), Dot.squareSideLength());
+    };
+    Dot.prototype.lock = function () {
+        this.isLocked = true;
+        return this;
     };
     Dot.prototype.draw = function (boardContext, activated) {
         if (activated === void 0) { activated = true; }
@@ -260,11 +291,9 @@ var Dot = /** @class */ (function () {
         var path = new Path2D();
         console.debug("Drawing at (" + this.centerX() + ", " + this.centerY() + ")");
         console.count("drawn dots");
-        if (!activated) {
-            boardContext.fillStyle = "#000";
+        if (activated) {
+            this.isActivated = true;
         }
-        else
-            boardContext.fillStyle = "#fff";
         path.arc(this.centerX(), this.centerY(), activated ? Dot.radius() : Dot.radius() / 3.3, 0, 360);
         boardContext.stroke(path);
         return this;
@@ -277,6 +306,19 @@ var Dot = /** @class */ (function () {
 }());
 var game = new Game(document.querySelector("main"));
 game.createBoard().then(function () {
+    var dot;
+    game.canvas.onmousemove = function (e) {
+        var bounds = e.target.getBoundingClientRect();
+        var _a = [e.clientX - bounds.left, e.clientY - bounds.top], x = _a[0], y = _a[1];
+        var nextDot = game.getDotAt(x, y);
+        //if (!!nextDot) console.debug(`Found a dot at index [%i, %i]`, nextDot.xIndex, nextDot.yIndex)
+        if (!!dot && !dot.equals(nextDot) && !dot.isLocked)
+            game.toggleDotActivated(dot.xIndex, dot.yIndex, false);
+        if (!!nextDot) {
+            game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);
+        }
+        dot = nextDot;
+    };
     // game.toggleDotActivated(2, 2, true);
     // game.toggleDotActivated(2, 5, false);
 });
