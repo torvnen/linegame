@@ -58,12 +58,28 @@ var Game = /** @class */ (function () {
     }
     Game.prototype.createBoard = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, x, y, draw3OrNDots;
+            var _a, xIndex, yIndex, drawWithDelay, draw3OrNDots, coordsWithFilledDots, _loop_1, y;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = [5, 1], x = _a[0], y = _a[1];
+                        _a = [5, 2], xIndex = _a[0], yIndex = _a[1];
+                        drawWithDelay = function (xIndex, yIndex, activated, delayMs) {
+                            if (activated === void 0) { activated = false; }
+                            if (delayMs === void 0) { delayMs = 20; }
+                            return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            this.state.push(new Dot(xIndex, yIndex).draw(this.boardContext, activated));
+                                            return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, delayMs); })];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            });
+                        };
                         draw3OrNDots = function (direction, n, delayMs) {
                             if (n === void 0) { n = 3; }
                             if (delayMs === void 0) { delayMs = 20; }
@@ -78,20 +94,19 @@ var Game = /** @class */ (function () {
                                             if (!(i < n)) return [3 /*break*/, 4];
                                             switch (direction) {
                                                 case "up":
-                                                    y--;
+                                                    yIndex--;
                                                     break;
                                                 case "down":
-                                                    y++;
+                                                    yIndex++;
                                                     break;
                                                 case "right":
-                                                    x++;
+                                                    xIndex++;
                                                     break;
                                                 case "left":
-                                                    x--;
+                                                    xIndex--;
                                                     break;
                                             }
-                                            this.state.push(new Dot(x, y).draw(this.boardContext));
-                                            return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, delayMs); })];
+                                            return [4 /*yield*/, drawWithDelay(xIndex, yIndex, true)];
                                         case 2:
                                             _a.sent();
                                             _a.label = 3;
@@ -143,7 +158,56 @@ var Game = /** @class */ (function () {
                         return [4 /*yield*/, draw3OrNDots("up")];
                     case 12:
                         _b.sent();
-                        return [2 /*return*/];
+                        coordsWithFilledDots = this.state.map(function (dot) { return [
+                            dot.xIndex,
+                            dot.yIndex,
+                        ]; });
+                        _loop_1 = function (y) {
+                            var _loop_2, x;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        _loop_2 = function (x) {
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0:
+                                                        if (!coordsWithFilledDots.some(function (c) { return c[0] === x && c[1] === y; })) return [3 /*break*/, 1];
+                                                        return [2 /*return*/, "continue"];
+                                                    case 1: return [4 /*yield*/, drawWithDelay(x, y, false, 6)];
+                                                    case 2:
+                                                        _a.sent();
+                                                        _a.label = 3;
+                                                    case 3: return [2 /*return*/];
+                                                }
+                                            });
+                                        };
+                                        x = 0;
+                                        _a.label = 1;
+                                    case 1:
+                                        if (!(x < 14)) return [3 /*break*/, 4];
+                                        return [5 /*yield**/, _loop_2(x)];
+                                    case 2:
+                                        _a.sent();
+                                        _a.label = 3;
+                                    case 3:
+                                        x++;
+                                        return [3 /*break*/, 1];
+                                    case 4: return [2 /*return*/];
+                                }
+                            });
+                        };
+                        y = 0;
+                        _b.label = 13;
+                    case 13:
+                        if (!(y < 14)) return [3 /*break*/, 16];
+                        return [5 /*yield**/, _loop_1(y)];
+                    case 14:
+                        _b.sent();
+                        _b.label = 15;
+                    case 15:
+                        y++;
+                        return [3 /*break*/, 13];
+                    case 16: return [2 /*return*/];
                 }
             });
         });
@@ -153,25 +217,45 @@ var Game = /** @class */ (function () {
     return Game;
 }());
 var Dot = /** @class */ (function () {
-    function Dot(x, y) {
-        this.x = x;
-        this.y = y;
+    function Dot(xIndex, yIndex) {
+        var _this = this;
+        this.startX = function (withPadding) {
+            if (withPadding === void 0) { withPadding = true; }
+            return _this.xIndex * (Dot.diameter + Dot.padding() * 2) +
+                (withPadding ? Dot.padding() : 0);
+        };
+        this.startY = function (withPadding) {
+            if (withPadding === void 0) { withPadding = true; }
+            return _this.yIndex * (Dot.diameter + Dot.padding() * 2) +
+                (withPadding ? Dot.padding() : 0);
+        };
+        this.centerX = function () { return _this.startX() + Dot.padding() + Dot.radius(); };
+        this.centerY = function () { return _this.startY() + Dot.padding() + Dot.radius(); };
+        this.xIndex = xIndex;
+        this.yIndex = yIndex;
     }
-    Dot.prototype.draw = function (boardContext) {
+    Dot.prototype.clear = function (boardContext) {
+        boardContext.clearRect(this.startX(), this.startY(), Dot.squareSideLength(), Dot.squareSideLength());
+    };
+    Dot.prototype.draw = function (boardContext, activated) {
+        if (activated === void 0) { activated = true; }
+        this.clear(boardContext);
         var path = new Path2D();
-        var _a = [
-            this.x * (Dot.diameter + Dot.padding * 2) + Dot.radius,
-            this.y * (Dot.diameter + Dot.padding * 2) + Dot.radius,
-        ], centerX = _a[0], centerY = _a[1];
-        console.debug("Drawing at (" + centerX + ", " + centerY + ")");
+        console.debug("Drawing at (" + this.centerX() + ", " + this.centerY() + ")");
         console.count("drawn dots");
-        path.arc(centerX, centerY, (Dot.diameter / 2), 0, 360);
+        if (!activated) {
+            boardContext.fillStyle = "#000";
+        }
+        else
+            boardContext.fillStyle = "#fff";
+        path.arc(this.centerX(), this.centerY(), activated ? Dot.radius() : (Dot.radius() / 3.3), 0, 360);
         boardContext.stroke(path);
         return this;
     };
     Dot.diameter = 14;
-    Dot.radius = Dot.diameter / 2;
-    Dot.padding = 0.4 * Dot.diameter;
+    Dot.radius = function () { return Dot.diameter / 2; };
+    Dot.padding = function () { return 0.4 * Dot.diameter; };
+    Dot.squareSideLength = function () { return Dot.diameter + Dot.padding() * 2; };
     return Dot;
 }());
 var game = new Game(document.querySelector("main"));
