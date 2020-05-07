@@ -126,9 +126,7 @@ class Game {
   async createBoard() {
     // Amount of padding:
     const padding = Math.floor((Game.dotsPerSide - 10) / 2);
-    // Start position is initial padding per side,
-    // * plus 5 for x and 1 for y
-    let [xIndex, yIndex] = [padding + 5, padding + 1];
+    let [xIndex, yIndex] = [padding + 3, padding];
 
     const drawWithDelay = async (
       xIndex: number,
