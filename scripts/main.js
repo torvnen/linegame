@@ -61,6 +61,25 @@ var Game = /** @class */ (function () {
         this.board.forEach(function (dArr) { return dArr.forEach(function (d) { return flat.push(d); }); });
         return flat;
     };
+    Game.prototype.isDotActivateable = function (dot) {
+        var xIndex = dot.xIndex, yIndex = dot.yIndex;
+        var neighborIndices = [
+            [xIndex - 1, yIndex + 1],
+            [xIndex - 1, yIndex],
+            [xIndex - 1, yIndex - 1],
+            [xIndex, yIndex - 1],
+            [xIndex + 1, yIndex - 1],
+            [xIndex + 1, yIndex],
+            [xIndex + 1, yIndex + 1],
+            [xIndex, yIndex + 1],
+        ];
+        for (var _i = 0, neighborIndices_1 = neighborIndices; _i < neighborIndices_1.length; _i++) {
+            var _a = neighborIndices_1[_i], x = _a[0], y = _a[1];
+            if (this.board[x] && this.board[x][y] && this.board[x][y].isLocked)
+                return true;
+        }
+        return false;
+    };
     Game.prototype.getDotAt = function (x, y) {
         var dots = this.flattenBoard();
         return dots.find(function (d) {
@@ -72,6 +91,17 @@ var Game = /** @class */ (function () {
                 return false;
             return true;
         });
+    };
+    Game.prototype.getPossibleLines = function (dot) {
+        var _a = [dot.xIndex, dot.yIndex], xI = _a[0], yI = _a[1];
+        var possibilities = Array();
+        for (var d in LineDirection) {
+            for (var i = -4; i < 4; i++) {
+                var possible = false;
+                switch (d) {
+                }
+            }
+        }
     };
     Game.prototype.addToBoard = function (dot) {
         if (!Array.isArray(this.board[dot.xIndex]))
@@ -242,15 +272,29 @@ var Game = /** @class */ (function () {
             return;
         this.board[xIndex][yIndex].draw(this.context, activated);
     };
+    Game.prototype.lockDot = function (dot) {
+        var lockable = dot.isLockable(this.flattenBoard());
+        if (lockable)
+            dot.lock().draw(this.context, true);
+        return lockable;
+    };
     Game.boardW = 600;
     Game.boardH = 600;
     return Game;
 }());
+var LineDirection;
+(function (LineDirection) {
+    LineDirection[LineDirection["Horizontal"] = 0] = "Horizontal";
+    LineDirection[LineDirection["Vertical"] = 1] = "Vertical";
+    LineDirection[LineDirection["TopLeftToBottomRight"] = 2] = "TopLeftToBottomRight";
+    LineDirection[LineDirection["BottomLeftToTopRight"] = 3] = "BottomLeftToTopRight";
+})(LineDirection || (LineDirection = {}));
 var Dot = /** @class */ (function () {
     function Dot(xIndex, yIndex, locked) {
         var _this = this;
         if (locked === void 0) { locked = false; }
         this.isActivated = false;
+        this.lineDirections = Array();
         this.startX = function (withPadding) {
             if (withPadding === void 0) { withPadding = true; }
             return _this.xIndex * (Dot.diameter + Dot.padding() * 2) +
@@ -263,11 +307,13 @@ var Dot = /** @class */ (function () {
         };
         this.endX = function (withPadding) {
             if (withPadding === void 0) { withPadding = true; }
-            return _this.startX(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
+            return _this.startX(withPadding) +
+                (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
         };
         this.endY = function (withPadding) {
             if (withPadding === void 0) { withPadding = true; }
-            return _this.startY(withPadding) + (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
+            return _this.startY(withPadding) +
+                (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
         };
         this.centerX = function () { return _this.startX() + Dot.padding() + Dot.radius(); };
         this.centerY = function () { return _this.startY() + Dot.padding() + Dot.radius(); };
@@ -280,6 +326,9 @@ var Dot = /** @class */ (function () {
     };
     Dot.prototype.clear = function (boardContext) {
         boardContext.clearRect(this.startX(), this.startY(), Dot.squareSideLength(), Dot.squareSideLength());
+    };
+    Dot.prototype.isLockable = function (otherDots) {
+        return true;
     };
     Dot.prototype.lock = function () {
         this.isLocked = true;
@@ -307,17 +356,30 @@ var Dot = /** @class */ (function () {
 var game = new Game(document.querySelector("main"));
 game.createBoard().then(function () {
     var dot;
-    game.canvas.onmousemove = function (e) {
+    var getRelativeCoords = function (e) {
         var bounds = e.target.getBoundingClientRect();
         var _a = [e.clientX - bounds.left, e.clientY - bounds.top], x = _a[0], y = _a[1];
+        return { x: x, y: y };
+    };
+    game.canvas.onmousemove = function (e) {
+        var _a = getRelativeCoords(e), x = _a.x, y = _a.y;
         var nextDot = game.getDotAt(x, y);
-        //if (!!nextDot) console.debug(`Found a dot at index [%i, %i]`, nextDot.xIndex, nextDot.yIndex)
         if (!!dot && !dot.equals(nextDot) && !dot.isLocked)
             game.toggleDotActivated(dot.xIndex, dot.yIndex, false);
-        if (!!nextDot) {
+        if (!!nextDot && game.isDotActivateable(nextDot)) {
             game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);
         }
         dot = nextDot;
+    };
+    game.canvas.onclick = function (e) {
+        // TODO use click (or touch) + drag to draw a line from
+        // * any dot to another, and see if that line is legible.
+        // If the line is legible, display it as black, otherwise as red.
+        // Display the to-activate dots with some other styling while forming the line.
+        // Also check if the line would be too long.
+        if (!!dot) {
+            dot.lock();
+        }
     };
     // game.toggleDotActivated(2, 2, true);
     // game.toggleDotActivated(2, 5, false);
