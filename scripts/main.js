@@ -43,6 +43,7 @@ var Game = /** @class */ (function () {
     function Game(container) {
         this.container = container;
         this.board = Array();
+        this.lines = Array();
         if (!container)
             throw new Error("No main found");
         this.canvas = document.createElement("canvas");
@@ -51,11 +52,14 @@ var Game = /** @class */ (function () {
         var ctx = this.canvas.getContext("2d");
         if (!ctx)
             throw new Error("Context could not be created");
-        this.context = ctx;
-        this.context.strokeStyle = "#000";
+        Game.context = ctx;
+        Game.context.strokeStyle = "#000";
         container.innerHTML = "";
         container.appendChild(this.canvas);
     }
+    Game.prototype.startDrawingLine = function (dot) {
+        throw new Error("Method not implemented.");
+    };
     Game.prototype.flattenBoard = function () {
         var flat = Array();
         this.board.forEach(function (dArr) { return dArr.forEach(function (d) { return flat.push(d); }); });
@@ -79,6 +83,13 @@ var Game = /** @class */ (function () {
                 return true;
         }
         return false;
+    };
+    Game.prototype.completeOrDestroyLine = function (line) {
+        if (!!line && line.isLegitimate) {
+            this.lines.push(line.finish());
+        }
+        else
+            line.destroy();
     };
     Game.prototype.getDotAt = function (x, y) {
         var dots = this.flattenBoard();
@@ -124,7 +135,7 @@ var Game = /** @class */ (function () {
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            this.addToBoard(new Dot(xIndex, yIndex, locked).draw(this.context, activated));
+                                            this.addToBoard(new Dot(xIndex, yIndex, locked).draw(activated));
                                             return [4 /*yield*/, new Promise(function (r) { return setTimeout(r, delayMs); })];
                                         case 1:
                                             _a.sent();
@@ -270,12 +281,12 @@ var Game = /** @class */ (function () {
             return;
         if (!this.board[xIndex][yIndex])
             return;
-        this.board[xIndex][yIndex].draw(this.context, activated);
+        this.board[xIndex][yIndex].draw(activated);
     };
     Game.prototype.lockDot = function (dot) {
         var lockable = dot.isLockable(this.flattenBoard());
         if (lockable)
-            dot.lock().draw(this.context, true);
+            dot.lock().draw(true);
         return lockable;
     };
     Game.boardW = 600;
@@ -284,11 +295,138 @@ var Game = /** @class */ (function () {
 }());
 var LineDirection;
 (function (LineDirection) {
-    LineDirection[LineDirection["Horizontal"] = 0] = "Horizontal";
-    LineDirection[LineDirection["Vertical"] = 1] = "Vertical";
-    LineDirection[LineDirection["TopLeftToBottomRight"] = 2] = "TopLeftToBottomRight";
-    LineDirection[LineDirection["BottomLeftToTopRight"] = 3] = "BottomLeftToTopRight";
+    LineDirection[LineDirection["None"] = 0] = "None";
+    LineDirection[LineDirection["Down"] = 1] = "Down";
+    LineDirection[LineDirection["Up"] = 2] = "Up";
+    LineDirection[LineDirection["LeftToRight"] = 4] = "LeftToRight";
+    LineDirection[LineDirection["RightToLeft"] = 8] = "RightToLeft";
 })(LineDirection || (LineDirection = {}));
+var Line = /** @class */ (function () {
+    function Line(start) {
+        this._finished = false;
+        this._dots = Array();
+        this.start = start;
+    }
+    Object.defineProperty(Line.prototype, "finished", {
+        get: function () {
+            return this._finished;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Line.prototype, "endDot", {
+        get: function () {
+            var lineDirection = this.lineDirection;
+            return this._dots.reduce(function (prev, curr) {
+                if ((lineDirection & LineDirection.LeftToRight) ===
+                    LineDirection.LeftToRight)
+                    return prev.xIndex > curr.xIndex ? prev : curr;
+                return prev.xIndex < curr.xIndex ? prev : curr;
+            });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Line.prototype, "lineDirection", {
+        get: function () {
+            var _this = this;
+            var dot2 = this._dots.find(function (d) {
+                return _this.start.neighborIndices.some(function (_a) {
+                    var x = _a[0], y = _a[1];
+                    return d.xIndex === x && d.yIndex === y;
+                });
+            });
+            if (!dot2)
+                return LineDirection.None;
+            var upOrDown = this.start.yIndex === dot2.yIndex
+                ? LineDirection.None
+                : this.start.yIndex < dot2.yIndex
+                    ? LineDirection.Down
+                    : LineDirection.Up;
+            var ltrOrRtl = this.start.xIndex === dot2.xIndex
+                ? LineDirection.None
+                : this.start.xIndex < dot2.xIndex
+                    ? LineDirection.LeftToRight
+                    : LineDirection.RightToLeft;
+            return upOrDown | ltrOrRtl;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Line.prototype, "isLegitimate", {
+        get: function () {
+            var curr = this.start;
+            for (var i = 0; i < 5; i++) {
+                var next = this._dots.find(function (d) {
+                    return curr.neighborIndices.some(function (_a) {
+                        var x = _a[0], y = _a[1];
+                        return d.xIndex === x && d.yIndex === y;
+                    });
+                });
+                if (!next)
+                    return false;
+                curr = next;
+            }
+            return true;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Line.prototype.finish = function () {
+        this._finished = true;
+        return this;
+    };
+    Line.prototype.destroy = function () {
+        for (var _i = 0, _a = this._dots; _i < _a.length; _i++) {
+            var dot = _a[_i];
+            dot.draw(dot.isLocked, false);
+        }
+    };
+    Object.defineProperty(Line.prototype, "coords", {
+        get: function () {
+            var d1 = this.start;
+            var d2 = this.endDot;
+            var isLtr = (this.lineDirection & LineDirection.LeftToRight) ===
+                LineDirection.LeftToRight;
+            var isRtl = (this.lineDirection & LineDirection.RightToLeft) ===
+                LineDirection.RightToLeft;
+            var isDown = (this.lineDirection & LineDirection.Down) === LineDirection.Down;
+            var isUp = (this.lineDirection & LineDirection.Up) === LineDirection.Up;
+            var c = {};
+            if (isLtr || isRtl) {
+                // It's a horizontal or diagonal line
+                c.startX = isLtr ? d1.startX(true) : d1.endX(true);
+                c.endX = isLtr ? d2.endX(true) : d2.startX(true);
+                if (isDown) {
+                    c.startY = d1.startY(true);
+                    c.endY = d2.endY(true);
+                }
+                else if (isUp) {
+                    c.startY = d1.endY(true);
+                    c.endY = d2.startY(true);
+                }
+                else {
+                    c.startY = (d1.startY() + d1.endY()) / 2;
+                    c.endY = (d2.startY() + d2.endY()) / 2;
+                }
+            }
+            else {
+                // It's a vertical line
+                c.startX = (d1.startX(true) + d1.endX(true)) / 2;
+                c.endX = c.startX;
+                c.startY = isDown ? d1.startY(true) : d1.endY(true);
+                c.endY = isDown ? d2.endY(true) : d1.startY(true);
+            }
+            return c;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Line.prototype.draw = function () {
+        var coords = this.coords;
+    };
+    return Line;
+}());
 var Dot = /** @class */ (function () {
     function Dot(xIndex, yIndex, locked) {
         var _this = this;
@@ -321,22 +459,43 @@ var Dot = /** @class */ (function () {
         this.yIndex = yIndex;
         this.isLocked = locked;
     }
+    Object.defineProperty(Dot.prototype, "neighborIndices", {
+        get: function () {
+            return [
+                [this.xIndex - 1, this.yIndex + 1],
+                [this.xIndex - 1, this.yIndex],
+                [this.xIndex - 1, this.yIndex - 1],
+                [this.xIndex, this.yIndex - 1],
+                [this.xIndex + 1, this.yIndex - 1],
+                [this.xIndex + 1, this.yIndex],
+                [this.xIndex + 1, this.yIndex + 1],
+                [this.xIndex, this.yIndex + 1],
+            ];
+        },
+        enumerable: true,
+        configurable: true
+    });
     Dot.prototype.equals = function (other) {
         return (!!other && other.xIndex === this.xIndex && other.yIndex === this.yIndex);
     };
-    Dot.prototype.clear = function (boardContext) {
-        boardContext.clearRect(this.startX(), this.startY(), Dot.squareSideLength(), Dot.squareSideLength());
+    Dot.prototype.clear = function () {
+        Game.context.clearRect(this.startX(), this.startY(), Dot.squareSideLength(), Dot.squareSideLength());
     };
     Dot.prototype.isLockable = function (otherDots) {
         return true;
+    };
+    Dot.prototype.activate = function () {
+        this.draw(true);
+        return this;
     };
     Dot.prototype.lock = function () {
         this.isLocked = true;
         return this;
     };
-    Dot.prototype.draw = function (boardContext, activated) {
+    Dot.prototype.draw = function (activated, highlighted) {
         if (activated === void 0) { activated = true; }
-        this.clear(boardContext);
+        if (highlighted === void 0) { highlighted = false; }
+        this.clear();
         var path = new Path2D();
         console.debug("Drawing at (" + this.centerX() + ", " + this.centerY() + ")");
         console.count("drawn dots");
@@ -344,7 +503,9 @@ var Dot = /** @class */ (function () {
             this.isActivated = true;
         }
         path.arc(this.centerX(), this.centerY(), activated ? Dot.radius() : Dot.radius() / 3.3, 0, 360);
-        boardContext.stroke(path);
+        Game.context.stroke(path);
+        if (highlighted)
+            Game.context.fill(path);
         return this;
     };
     Dot.diameter = 14;
@@ -355,7 +516,10 @@ var Dot = /** @class */ (function () {
 }());
 var game = new Game(document.querySelector("main"));
 game.createBoard().then(function () {
-    var dot;
+    var startDot;
+    var endDot;
+    var isDragging = false;
+    var line;
     var getRelativeCoords = function (e) {
         var bounds = e.target.getBoundingClientRect();
         var _a = [e.clientX - bounds.left, e.clientY - bounds.top], x = _a[0], y = _a[1];
@@ -364,21 +528,33 @@ game.createBoard().then(function () {
     game.canvas.onmousemove = function (e) {
         var _a = getRelativeCoords(e), x = _a.x, y = _a.y;
         var nextDot = game.getDotAt(x, y);
-        if (!!dot && !dot.equals(nextDot) && !dot.isLocked)
-            game.toggleDotActivated(dot.xIndex, dot.yIndex, false);
+        if (!!startDot && !startDot.equals(nextDot) && !startDot.isLocked)
+            game.toggleDotActivated(startDot.xIndex, startDot.yIndex, false);
         if (!!nextDot && game.isDotActivateable(nextDot)) {
             game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);
         }
-        dot = nextDot;
+        if (!isDragging)
+            startDot = nextDot;
+        else
+            endDot = nextDot;
     };
-    game.canvas.onclick = function (e) {
+    game.canvas.ondragstart = function (e) {
         // TODO use click (or touch) + drag to draw a line from
         // * any dot to another, and see if that line is legible.
         // If the line is legible, display it as black, otherwise as red.
         // Display the to-activate dots with some other styling while forming the line.
         // Also check if the line would be too long.
-        if (!!dot) {
-            dot.lock();
+        if (!!startDot) {
+            startDot.lock();
+            line = new Line(startDot);
+        }
+    };
+    game.canvas.ondragend = function (e) {
+        game.completeOrDestroyLine(line);
+    };
+    game.canvas.ondrag = function (e) {
+        if (!!startDot && startDot.isLocked) {
+            line = game.startDrawingLine(startDot);
         }
     };
     // game.toggleDotActivated(2, 2, true);

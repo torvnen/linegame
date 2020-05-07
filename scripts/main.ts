@@ -5,9 +5,10 @@ const doNTimes = (f: () => any, n: Number): void => {
 class Game {
   static boardW = 600;
   static boardH = 600;
+  static context: CanvasRenderingContext2D;
   private board = Array<Array<Dot>>();
+  private lines = Array<Line>();
   canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
 
   constructor(private container: HTMLElement | null) {
     if (!container) throw new Error("No main found");
@@ -16,10 +17,14 @@ class Game {
     this.canvas.height = Game.boardH;
     const ctx = this.canvas.getContext("2d");
     if (!ctx) throw new Error("Context could not be created");
-    this.context = ctx;
-    this.context.strokeStyle = "#000";
+    Game.context = ctx;
+    Game.context.strokeStyle = "#000";
     container.innerHTML = "";
     container.appendChild(this.canvas);
+  }
+
+  startDrawingLine(dot: Dot): Line {
+    throw new Error("Method not implemented.");
   }
 
   flattenBoard(): Array<Dot> {
@@ -28,7 +33,7 @@ class Game {
     return flat;
   }
 
-  isDotActivateable(dot: Dot): Boolean {
+  isDotActivateable(dot: Dot): boolean {
     const { xIndex, yIndex } = dot;
     const neighborIndices = [
       [xIndex - 1, yIndex + 1], // bottom-left
@@ -46,7 +51,11 @@ class Game {
     }
     return false;
   }
-
+  completeOrDestroyLine(line: Line) {
+    if (!!line && line.isLegitimate) {
+      this.lines.push(line.finish());
+    } else line.destroy();
+  }
   getDotAt(x: number, y: number): Dot | null {
     const dots = this.flattenBoard();
     return dots.find((d) => {
@@ -82,13 +91,11 @@ class Game {
     const drawWithDelay = async (
       xIndex: number,
       yIndex: number,
-      activated: Boolean = false,
-      locked: Boolean = false,
+      activated: boolean = false,
+      locked: boolean = false,
       delayMs: number = 20
     ) => {
-      this.addToBoard(
-        new Dot(xIndex, yIndex, locked).draw(this.context, activated)
-      );
+      this.addToBoard(new Dot(xIndex, yIndex, locked).draw(activated));
       await new Promise((r: any) => setTimeout(r, delayMs));
     };
 
@@ -145,24 +152,135 @@ class Game {
     }
   }
 
-  toggleDotActivated(xIndex: number, yIndex: number, activated: Boolean) {
+  toggleDotActivated(xIndex: number, yIndex: number, activated: boolean) {
     if (!Array.isArray(this.board[xIndex])) return;
     if (!this.board[xIndex][yIndex]) return;
-    this.board[xIndex][yIndex].draw(this.context, activated);
+    this.board[xIndex][yIndex].draw(activated);
   }
 
-  lockDot(dot: Dot): Boolean {
+  lockDot(dot: Dot): boolean {
     const lockable = dot.isLockable(this.flattenBoard());
-    if (lockable) dot.lock().draw(this.context, true);
+    if (lockable) dot.lock().draw(true);
     return lockable;
   }
 }
 
 enum LineDirection {
-  Horizontal = 0,
-  Vertical,
-  TopLeftToBottomRight,
-  BottomLeftToTopRight,
+  None = 0,
+  Down = 1 << 0,
+  Up = 1 << 1,
+  LeftToRight = 1 << 2,
+  RightToLeft = 1 << 3,
+}
+
+interface LineCoords {
+  startX?: number;
+  startY?: number;
+  endX?: number;
+  endY?: number;
+}
+
+class Line {
+  private _finished = false;
+  private _dots = Array<Dot>();
+  start: Dot;
+  get finished() {
+    return this._finished;
+  }
+  get endDot(): Dot {
+    const lineDirection = this.lineDirection;
+    return this._dots.reduce((prev, curr) => {
+      if (
+        (lineDirection & LineDirection.LeftToRight) ===
+        LineDirection.LeftToRight
+      )
+        return prev.xIndex > curr.xIndex ? prev : curr;
+      return prev.xIndex < curr.xIndex ? prev : curr;
+    });
+  }
+  get lineDirection(): LineDirection {
+    const dot2 = this._dots.find((d) =>
+      this.start.neighborIndices.some(
+        ([x, y]) => d.xIndex === x && d.yIndex === y
+      )
+    );
+    if (!dot2) return LineDirection.None;
+    const upOrDown =
+      this.start.yIndex === dot2.yIndex
+        ? LineDirection.None
+        : this.start.yIndex < dot2.yIndex
+        ? LineDirection.Down
+        : LineDirection.Up;
+    const ltrOrRtl =
+      this.start.xIndex === dot2.xIndex
+        ? LineDirection.None
+        : this.start.xIndex < dot2.xIndex
+        ? LineDirection.LeftToRight
+        : LineDirection.RightToLeft;
+    return upOrDown | ltrOrRtl;
+  }
+  get isLegitimate(): boolean {
+    let curr = this.start;
+    for (let i = 0; i < 5; i++) {
+      let next = this._dots.find((d) =>
+        curr.neighborIndices.some(([x, y]) => d.xIndex === x && d.yIndex === y)
+      );
+      if (!next) return false;
+      curr = next;
+    }
+    return true;
+  }
+  constructor(start: Dot) {
+    this.start = start;
+  }
+  finish(): Line {
+    this._finished = true;
+    return this;
+  }
+  destroy(): void {
+    for (let dot of this._dots) {
+      dot.draw(dot.isLocked, false);
+    }
+  }
+  get coords(): LineCoords | null {
+    const d1 = this.start;
+    const d2 = this.endDot;
+    const isLtr =
+      (this.lineDirection & LineDirection.LeftToRight) ===
+      LineDirection.LeftToRight;
+    const isRtl =
+      (this.lineDirection & LineDirection.RightToLeft) ===
+      LineDirection.RightToLeft;
+    const isDown =
+      (this.lineDirection & LineDirection.Down) === LineDirection.Down;
+    const isUp = (this.lineDirection & LineDirection.Up) === LineDirection.Up;
+    const c: LineCoords = {};
+    if (isLtr || isRtl) {
+      // It's a horizontal or diagonal line
+      c.startX = isLtr ? d1.startX(true) : d1.endX(true);
+      c.endX = isLtr ? d2.endX(true) : d2.startX(true);
+      if (isDown) {
+        c.startY = d1.startY(true);
+        c.endY = d2.endY(true);
+      } else if (isUp) {
+        c.startY = d1.endY(true);
+        c.endY = d2.startY(true);
+      } else {
+        c.startY = (d1.startY() + d1.endY()) / 2;
+        c.endY = (d2.startY() + d2.endY()) / 2;
+      }
+    } else {
+      // It's a vertical line
+      c.startX = (d1.startX(true) + d1.endX(true)) / 2;
+      c.endX = c.startX;
+      c.startY = isDown ? d1.startY(true) : d1.endY(true);
+      c.endY = isDown ? d2.endY(true) : d1.startY(true);
+    }
+    return c;
+  }
+  draw() {
+    const coords = this.coords;
+  }
 }
 
 class Dot {
@@ -172,53 +290,68 @@ class Dot {
   static squareSideLength = (): number => Dot.diameter + Dot.padding() * 2;
   xIndex: number;
   yIndex: number;
-  isActivated: Boolean = false;
-  isLocked: Boolean;
+  isActivated: boolean = false;
+  isLocked: boolean;
   lineDirections = Array<LineDirection>();
+  get neighborIndices() {
+    return [
+      [this.xIndex - 1, this.yIndex + 1], // bottom-left
+      [this.xIndex - 1, this.yIndex], // left
+      [this.xIndex - 1, this.yIndex - 1], // top-left
+      [this.xIndex, this.yIndex - 1], // top
+      [this.xIndex + 1, this.yIndex - 1], // top-right
+      [this.xIndex + 1, this.yIndex], // right
+      [this.xIndex + 1, this.yIndex + 1], // bottom-right
+      [this.xIndex, this.yIndex + 1], // bottom
+    ];
+  }
 
-  constructor(xIndex: number, yIndex: number, locked: Boolean = false) {
+  constructor(xIndex: number, yIndex: number, locked: boolean = false) {
     this.xIndex = xIndex;
     this.yIndex = yIndex;
     this.isLocked = locked;
   }
 
-  startX = (withPadding: Boolean = true): number =>
+  startX = (withPadding: boolean = true): number =>
     this.xIndex * (Dot.diameter + Dot.padding() * 2) +
     (withPadding ? Dot.padding() : 0);
-  startY = (withPadding: Boolean = true): number =>
+  startY = (withPadding: boolean = true): number =>
     this.yIndex * (Dot.diameter + Dot.padding() * 2) +
     (withPadding ? Dot.padding() : 0);
-  endX = (withPadding: Boolean = true): number =>
+  endX = (withPadding: boolean = true): number =>
     this.startX(withPadding) +
     (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
-  endY = (withPadding: Boolean = true): number =>
+  endY = (withPadding: boolean = true): number =>
     this.startY(withPadding) +
     (withPadding ? Dot.squareSideLength() : Dot.diameter + Dot.padding());
   centerX = (): number => this.startX() + Dot.padding() + Dot.radius();
   centerY = (): number => this.startY() + Dot.padding() + Dot.radius();
-  equals(other: Dot): Boolean {
+  equals(other: Dot): boolean {
     return (
       !!other && other.xIndex === this.xIndex && other.yIndex === this.yIndex
     );
   }
-  clear(boardContext: CanvasRenderingContext2D): void {
-    boardContext.clearRect(
+  clear(): void {
+    Game.context.clearRect(
       this.startX(),
       this.startY(),
       Dot.squareSideLength(),
       Dot.squareSideLength()
     );
   }
-  isLockable(otherDots: Array<Dot>): Boolean {
+  isLockable(otherDots: Array<Dot>): boolean {
     return true;
+  }
+  activate(): Dot {
+    this.draw(true);
+    return this;
   }
   lock(): Dot {
     this.isLocked = true;
     return this;
   }
-
-  draw(boardContext: CanvasRenderingContext2D, activated: Boolean = true): Dot {
-    this.clear(boardContext);
+  draw(activated = true, highlighted = false): Dot {
+    this.clear();
     const path = new Path2D();
     console.debug(`Drawing at (${this.centerX()}, ${this.centerY()})`);
     console.count("drawn dots");
@@ -232,7 +365,8 @@ class Dot {
       0,
       360
     );
-    boardContext.stroke(path);
+    Game.context.stroke(path);
+    if (highlighted) Game.context.fill(path);
     return this;
   }
 }
@@ -240,7 +374,10 @@ class Dot {
 const game = new Game(document.querySelector("main"));
 
 game.createBoard().then(() => {
-  let dot: Dot;
+  let startDot: Dot;
+  let endDot: Dot;
+  let isDragging = false;
+  let line: Line;
   const getRelativeCoords = (e: MouseEvent): { x: number; y: number } => {
     const bounds = (e.target as HTMLElement).getBoundingClientRect();
     const [x, y] = [e.clientX - bounds.left, e.clientY - bounds.top];
@@ -250,21 +387,31 @@ game.createBoard().then(() => {
     const { x, y } = getRelativeCoords(e);
     const nextDot = game.getDotAt(x, y);
 
-    if (!!dot && !dot.equals(nextDot) && !dot.isLocked)
-      game.toggleDotActivated(dot.xIndex, dot.yIndex, false);
+    if (!!startDot && !startDot.equals(nextDot) && !startDot.isLocked)
+      game.toggleDotActivated(startDot.xIndex, startDot.yIndex, false);
     if (!!nextDot && game.isDotActivateable(nextDot)) {
       game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);
     }
-    dot = nextDot;
+    if (!isDragging) startDot = nextDot;
+    else endDot = nextDot;
   };
-  game.canvas.onclick = function (e: MouseEvent) {
+  game.canvas.ondragstart = function (e: MouseEvent) {
     // TODO use click (or touch) + drag to draw a line from
     // * any dot to another, and see if that line is legible.
     // If the line is legible, display it as black, otherwise as red.
     // Display the to-activate dots with some other styling while forming the line.
     // Also check if the line would be too long.
-    if (!!dot) {
-      dot.lock();
+    if (!!startDot) {
+      startDot.lock();
+      line = new Line(startDot);
+    }
+  };
+  game.canvas.ondragend = function (e: MouseEvent) {
+    game.completeOrDestroyLine(line);
+  };
+  game.canvas.ondrag = function (e: DragEvent) {
+    if (!!startDot && startDot.isLocked) {
+      line = game.startDrawingLine(startDot);
     }
   };
   // game.toggleDotActivated(2, 2, true);
