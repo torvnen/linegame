@@ -1,5 +1,12 @@
 import Game from "./Game";
 import { LineDirection } from "./Line";
+import { deconstructLineDirection, getLineCoords } from "./utils";
+
+export enum DotState {
+  Closed = 1 << 0,
+  Opened = 1 << 1, // Either initial opened dots (cross formation) or a hovered dot
+  StartOfIncomingLine = 1 << 2,
+}
 
 class Dot {
   static diameter: number = 14;
@@ -8,9 +15,13 @@ class Dot {
   static squareSideLength = (): number => Dot.diameter + Dot.padding() * 2;
   xIndex: number;
   yIndex: number;
-  isActivated: boolean = false;
-  isLocked: boolean;
   lineDirections = Array<LineDirection>();
+  private stateOnBoard: DotState | undefined;
+  private desiredState: DotState | undefined;
+  private isInitial: boolean;
+  get requiresRerender(): boolean {
+    return !!this.desiredState && this.stateOnBoard !== this.desiredState;
+  }
   get neighborIndices(): Array<{ x: number; y: number }> {
     return [
       { x: this.xIndex - 1, y: this.yIndex + 1 }, // bottom-left
@@ -24,12 +35,20 @@ class Dot {
     ];
   }
 
-  constructor(xIndex: number, yIndex: number, locked: boolean = false) {
+  constructor(xIndex: number, yIndex: number, isInitial = false) {
     this.xIndex = xIndex;
     this.yIndex = yIndex;
-    this.isLocked = locked;
+    this.isInitial = isInitial;
+    if (this.isInitial) this.desiredState = DotState.Opened;
+    else this.desiredState = DotState.Closed;
   }
-
+  get state() {
+    return !!this.desiredState ? this.desiredState : this.stateOnBoard;
+  }
+  requestState(s: DotState): Dot {
+    if (this.stateOnBoard !== s) this.desiredState = s;
+    return this;
+  }
   startX = (withPadding: boolean = true): number =>
     this.xIndex * (Dot.diameter + Dot.padding() * 2) +
     (withPadding ? Dot.padding() : 0);
@@ -57,34 +76,30 @@ class Dot {
       Dot.squareSideLength()
     );
   }
-  isLockable(otherDots: Array<Dot>): boolean {
-    return true;
-  }
-  activate(): Dot {
-    this.draw(true);
-    return this;
-  }
-  lock(): Dot {
-    this.isLocked = true;
-    return this;
-  }
-  draw(activated = true, highlighted = false): Dot {
+  draw(): Dot {
+    if (!this.requiresRerender) return this;
     this.clear();
     const path = new Path2D();
-    // console.debug(`Drawing at (${this.centerX()}, ${this.centerY()})`);
-    // console.count("drawn dots");
-    if (activated) {
-      this.isActivated = true;
-    }
     path.arc(
       this.centerX(),
       this.centerY(),
-      activated ? Dot.radius() : Dot.radius() / 3.3,
+      this.desiredState === DotState.Closed ? Dot.radius() / 3.3 : Dot.radius(),
       0,
       360
     );
     Game.context.stroke(path);
-    if (highlighted) Game.context.fill(path);
+    if (this.desiredState === DotState.StartOfIncomingLine)
+      Game.context.fill(path);
+    for (const lineDirection of this.lineDirections) {
+      const { startX, startY, endX, endY } = getLineCoords(this, lineDirection);
+      let path = new Path2D();
+      path.lineTo(endX, endY);
+      Game.context.moveTo(startX, startY);
+      Game.context.stroke(path);
+    }
+    // Canvas was updated - clear state flags
+    this.stateOnBoard = this.desiredState;
+    this.desiredState = undefined;
     return this;
   }
 }

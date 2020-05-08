@@ -67,7 +67,8 @@ class Line {
   }
   destroy(): void {
     for (let dot of this._dots) {
-      dot.draw(dot.isLocked, false);
+      dot.lineDirections = dot.lineDirections.filter(d => d !== this.direction)
+      dot.draw();
     }
   }
   get coords(): LineCoords | null {

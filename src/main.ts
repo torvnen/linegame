@@ -1,14 +1,13 @@
 import Line from "./Line";
-import Dot from "./Dot";
+import Dot, { DotState } from "./Dot";
 import Game from "./Game";
 
 const game = new Game(document.querySelector("main"));
 
-game.createBoard().then(() => {
-  let startDot: Dot | undefined;
-  let endDot: Dot | undefined;
-  let isDragging = false;
-  let line: Line | undefined;
+game.start().then(() => {
+  let hoveredDot: Dot | null
+  let startDot: Dot | null;
+  let endDot: Dot | null;
   const getRelativeCoords = (e: MouseEvent): { x: number; y: number } => {
     const bounds = (e.target as HTMLElement).getBoundingClientRect();
     const [x, y] = [e.clientX - bounds.left, e.clientY - bounds.top];
@@ -16,26 +15,27 @@ game.createBoard().then(() => {
   };
   game.canvas.onmousemove = function (e: MouseEvent) {
     const { x, y } = getRelativeCoords(e);
-    const nextDot = game.getDotAt(x, y);
-
-    if (!!startDot && !startDot.equals(nextDot) && !startDot.isLocked)
-      game.toggleDotActivated(startDot.xIndex, startDot.yIndex, false);
-    if (!!nextDot && game.isDotActivateable(nextDot)) {
-      game.toggleDotActivated(nextDot.xIndex, nextDot.yIndex, true);
+    const nextDot = game.getDotAtOrNull(x, y);
+    if (!startDot) {
+      // Not drawing a line. Clear the previous hovered dot.
+      if (!!hoveredDot) hoveredDot.requestState(DotState.Closed)
     }
-    if (!line) startDot = nextDot;
-    else endDot = nextDot;
+
+    if (!!startDot && !startDot.equals(hoveredDot)) {
+      // Hovered dot has changed. Update endDot.
+      endDot = nextDot;
+    } else {
+      // Hovered dot 
+      startDot = nextDot;
+    }
   };
   game.canvas.onmousedown = function (e: MouseEvent) {
-    if (!!startDot) {
-      startDot.lock();
-      line = new Line(startDot);
-    }
+    // On mouse down: set current hovered dot (if any)
+    // * as state=StartOfIncomingLine.
+    if (!!startDot) startDot.requestState(DotState.StartOfIncomingLine);
   };
   game.canvas.onmouseup = function (e: MouseEvent) {
     if (!!startDot) {
     }
-    game.completeOrDestroyLine(line);
-    line = undefined;
   };
 });
