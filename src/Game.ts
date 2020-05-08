@@ -7,11 +7,10 @@ class Game {
   static boardH = 600;
   static dotsPerSide = 20;
   static context: CanvasRenderingContext2D;
-  // private board = Array<Array<Dot>>();
-  private board: Board;
   private lines = Array<Line>();
   private renderIntervalId: any;
   canvas: HTMLCanvasElement;
+  board: Board;
 
   constructor(private container: HTMLElement | null) {
     if (!container) throw new Error("No main found");

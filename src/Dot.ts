@@ -46,7 +46,10 @@ class Dot {
     return !!this.desiredState ? this.desiredState : this.stateOnBoard;
   }
   requestState(s: DotState): Dot {
-    if (this.stateOnBoard !== s) this.desiredState = s;
+    if (this.stateOnBoard !== s) {
+      if (!(this.isInitial && s === DotState.Closed)) this.desiredState = s;
+    }
+    this.draw();
     return this;
   }
   startX = (withPadding: boolean = true): number =>

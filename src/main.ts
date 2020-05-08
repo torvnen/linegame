@@ -5,7 +5,6 @@ import Game from "./Game";
 const game = new Game(document.querySelector("main"));
 
 game.start().then(() => {
-  let hoveredDot: Dot | null
   let startDot: Dot | null;
   let endDot: Dot | null;
   const getRelativeCoords = (e: MouseEvent): { x: number; y: number } => {
@@ -16,18 +15,7 @@ game.start().then(() => {
   game.canvas.onmousemove = function (e: MouseEvent) {
     const { x, y } = getRelativeCoords(e);
     const nextDot = game.getDotAtOrNull(x, y);
-    if (!startDot) {
-      // Not drawing a line. Clear the previous hovered dot.
-      if (!!hoveredDot) hoveredDot.requestState(DotState.Closed)
-    }
-
-    if (!!startDot && !startDot.equals(hoveredDot)) {
-      // Hovered dot has changed. Update endDot.
-      endDot = nextDot;
-    } else {
-      // Hovered dot 
-      startDot = nextDot;
-    }
+    game.board.hoveredDot = nextDot;
   };
   game.canvas.onmousedown = function (e: MouseEvent) {
     // On mouse down: set current hovered dot (if any)

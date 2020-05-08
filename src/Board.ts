@@ -3,6 +3,15 @@ import Game from "./Game";
 
 export default class Board {
   state = Array<Array<Dot>>();
+  private _previousHoveredDot: Dot | undefined;
+  set hoveredDot(dot: Dot) {
+    if (!!dot && !dot.equals(this._previousHoveredDot)) {
+      if (!!this._previousHoveredDot)
+        this._previousHoveredDot.requestState(DotState.Closed);
+      dot.requestState(DotState.Opened);
+      this._previousHoveredDot = dot;
+    }
+  }
   addToBoard(dot: Dot) {
     if (!Array.isArray(this.state[dot.xIndex]))
       this.state[dot.xIndex] = Array<Dot>();
