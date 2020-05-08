@@ -3,14 +3,33 @@ import Game from "./Game";
 
 export default class Board {
   state = Array<Array<Dot>>();
-  private _previousHoveredDot: Dot | undefined;
-  set hoveredDot(dot: Dot) {
-    if (!!dot && !dot.equals(this._previousHoveredDot)) {
-      if (!!this._previousHoveredDot)
-        this._previousHoveredDot.requestState(DotState.Closed);
+  private _previousHovered: Dot | undefined;
+  private _previousStartOfLine: Dot | undefined;
+  private _endOfLine: Dot | undefined;
+  get hovered(): Dot | undefined {
+    return this._previousHovered;
+  }
+  set hovered(dot: Dot) {
+    if (!!dot && !dot.equals(this._previousHovered)) {
+      if (!!this._previousHovered)
+        this._previousHovered.requestState(DotState.Closed);
       dot.requestState(DotState.Opened);
-      this._previousHoveredDot = dot;
+      this._previousHovered = dot;
+      if (!!this._previousStartOfLine) {
+        this.endOfLine = dot;
+      }
     }
+  }
+  set endOfLine(dot: Dot) {
+    this._endOfLine = dot;
+  }
+  set startOfLine(dot: Dot) {
+    if (!!dot && !dot.equals(this._previousStartOfLine)) {
+      if (!!this._previousStartOfLine)
+        this._previousStartOfLine.requestState(DotState.Closed);
+      dot.requestState(DotState.StartOfIncomingLine);
+    }
+    this._previousStartOfLine = dot;
   }
   addToBoard(dot: Dot) {
     if (!Array.isArray(this.state[dot.xIndex]))
@@ -27,9 +46,13 @@ export default class Board {
       xIndex: number,
       yIndex: number,
       isInitial: boolean = false,
-      delayMs: number = 5
+      delayMs: number = 3
     ) => {
-      this.addToBoard(new Dot(xIndex, yIndex, isInitial).draw());
+      this.addToBoard(
+        new Dot(xIndex, yIndex, isInitial).requestState(
+          isInitial ? DotState.Opened : DotState.Closed
+        )
+      );
       await new Promise((r: any) => setTimeout(r, delayMs));
     };
 
@@ -51,7 +74,7 @@ export default class Board {
             xIndex--;
             break;
         }
-        await drawWithDelay(xIndex, yIndex, true, 20);
+        await drawWithDelay(xIndex, yIndex, true, 12);
       }
       return new Promise((r: any) => r());
     };
@@ -81,6 +104,8 @@ export default class Board {
         else await drawWithDelay(x, y);
       }
     }
+
+    return Promise.resolve();
   }
 
   flatten(): Array<Dot> {

@@ -3,9 +3,10 @@ import { LineDirection } from "./Line";
 import { deconstructLineDirection, getLineCoords } from "./utils";
 
 export enum DotState {
-  Closed = 1 << 0,
-  Opened = 1 << 1, // Either initial opened dots (cross formation) or a hovered dot
-  StartOfIncomingLine = 1 << 2,
+  Closed = 0,
+  Opened, // Either initial opened dots (cross formation) or a hovered dot
+  StartOfIncomingLine,
+  EndOfIncomingLine
 }
 
 class Dot {
@@ -47,10 +48,11 @@ class Dot {
   }
   requestState(s: DotState): Dot {
     if (this.stateOnBoard !== s) {
-      if (!(this.isInitial && s === DotState.Closed)) this.desiredState = s;
+      if (!(this.isInitial && s === DotState.Closed)) {
+        this.desiredState = s;
+      }
     }
-    this.draw();
-    return this;
+    return this.draw();
   }
   startX = (withPadding: boolean = true): number =>
     this.xIndex * (Dot.diameter + Dot.padding() * 2) +
@@ -80,7 +82,6 @@ class Dot {
     );
   }
   draw(): Dot {
-    if (!this.requiresRerender) return this;
     this.clear();
     const path = new Path2D();
     path.arc(
