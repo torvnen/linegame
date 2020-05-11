@@ -1,6 +1,9 @@
 import React, { CSSProperties } from "react";
 import Coords from "../classes/Coords";
-import { initialCellCoords } from "../classes/utils";
+import {
+  initialCellCoords,
+  getClassNamesForLineDirections,
+} from "../classes/utils";
 import { CELL_SIZE } from "../classes/constants";
 import { decorate, observe, autorun } from "mobx";
 import { observer } from "mobx-react";
@@ -14,42 +17,61 @@ function isCellSelected(props: CellProps): boolean {
     selectedCellCoords?.y === props.coords.y
   );
 }
-const makeStyle = (props: CellProps, isOpened: Boolean): CSSProperties => {
-  const isHighlighted = props.game.highlightedCoords.some(
-    (c) => c.x === props.coords.x && c.y === props.coords.y
-  );
+const makeStyle = (
+  isSelected: Boolean,
+  isOpened: Boolean,
+  isHighlighted: Boolean,
+  isEndOfLine: Boolean
+): CSSProperties => {
   return {
     width: CELL_SIZE,
     height: CELL_SIZE,
-    fontSize: isOpened || isCellSelected(props) ? 14 : 12,
+    fontSize: isOpened || isSelected ? 14 : 12,
     textAlign: "center",
-    background:
-      isCellSelected(props) && !isHighlighted
-        ? "red"
-        : isCellSelected(props) && isHighlighted
-        ? "rgb(103, 230, 123)"
-        : isHighlighted
-        ? "rgb(90, 190, 150)"
-        : "#f9f9f9",
+    backgroundColor: isEndOfLine
+      ? "rgb(90, 190, 150)"
+      : isSelected && !isHighlighted
+      ? "red"
+      : isSelected && isHighlighted
+      ? "rgb(103, 230, 123)"
+      : isHighlighted
+      ? "rgb(90, 190, 150)"
+      : "#f9f9f9",
   };
 };
 
 export const Cell = observer((props: CellProps) => {
-  const cell = props.game.cellAt(props.coords.x, props.coords.y);
+  const { x, y } = props.coords;
+  const cell = props.game.cellAt(x, y);
+  const isHighlighted = props.game.highlightedCoords.some(
+    (c) => c.x === x && c.y === y
+  );
+  const isEndOfLine =
+    isHighlighted &&
+    props.game.endOfLineCoords.some((c) => c.x === x && c.y === y);
   return (
     <td
-      className="noselect cell"
-      style={makeStyle(props, cell!.isOpened)}
+      className={`noselect cell ${getClassNamesForLineDirections(
+        cell!.lineDirections
+      )}`}
+      style={makeStyle(
+        isCellSelected(props),
+        cell!.isOpened,
+        isHighlighted,
+        isEndOfLine
+      )}
       onClick={() => {
-        if (!!props.game) {
-          if (
-            props.game.selectedCellCoords?.x === props.coords.x &&
-            props.game.selectedCellCoords?.y === props.coords.y
-          )
-            props.game.selectedCellCoords = undefined;
+        if (
+          props.game.selectedCellCoords?.x === x &&
+          props.game.selectedCellCoords?.y === y
+        ) {
+          props.game.selectedCellCoords = undefined;
+        } else {
+          if (isHighlighted) props.game.tryCompleteLine(props.coords);
           else props.game.selectedCellCoords = props.coords;
         }
       }}
+      data-coords={`[${x}, ${y}]`}
     >
       {cell!.isOpened || isCellSelected(props) ? <>&#9675;</> : <>&bull;</>}
     </td>

@@ -59,6 +59,25 @@ export function getDirectionForCoords(c1: Coords, c2: Coords) {
   return d;
 }
 
+export function getClassNamesForLineDirections(
+  directions: Direction[]
+): String {
+  if (!Array.isArray(directions) || directions.length === 0) return "";
+  const a = Array<String>();
+  for (const direction of directions) {
+    const d = dissectDirection(direction);
+    if ((d.isUp && d.isRight) || (d.isDown && d.isLeft))
+      a.push("line-right-up");
+    if ((d.isDown && d.isRight) || (d.isUp && d.isLeft))
+      a.push("line-right-down");
+    if ((d.isUp || d.isDown) && !d.isRight && !d.isLeft)
+      a.push("line-vertical");
+    if ((d.isRight || d.isLeft) && !d.isUp && !d.isDown)
+      a.push("line-horizontal");
+  }
+  return a.join(" ");
+}
+
 export function getNextCoords(coords: Coords, direction: Direction): Coords {
   const d = dissectDirection(direction);
   let { x, y } = coords;

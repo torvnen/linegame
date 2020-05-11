@@ -21,3 +21,43 @@ code {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+.cell {    
+  background-position: center;
+  background-size: 110%;
+}
+.line-vertical {
+  background-image: url('img/line_vertical.png')
+}
+.line-horizontal {
+  background-image: url('img/line_horizontal.png')
+}
+.line-right-down {
+  background-image: url('img/line_right_down.png')
+}
+.line-right-up {
+  background-image: url('img/line_right_up.png')
+}
+.line-right-down.line-horizontal {
+  background-image: url('img/line_right_down.png'), url('img/line_horizontal.png')
+}
+.line-right-down.line-vertical {
+  background-image: url('img/line_right_down.png'), url('img/line_vertical.png')
+}
+.line-right-up.line-horizontal {
+  background-image: url('img/line_right_up.png'), url('img/line_horizontal.png')
+}
+.line-right-up.line-vertical {
+  background-image: url('img/line_right_up.png'), url('img/line_vertical.png')
+}
+.line-horizontal.line-vertical {
+  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png')
+}
+.line-horizontal.line-vertical.line-right-down {
+  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_down.png')
+}
+.line-horizontal.line-vertical.line-right-up {
+  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_up.png')
+}
+.line-horizontal.line-vertical.line-right-down.line-right-up {
+  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_down.png'), url('img/line_right_up.png')
+}

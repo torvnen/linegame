@@ -24,11 +24,18 @@ class Game {
         .map((l) => l.coords)
         .reduce((prev, curr) => prev.concat(curr), []);
   }
+  get endOfLineCoords(): Array<Coords> {
+    if (!this.selectedCellCoords) return [];
+    else
+      return this.getPossibleLines(this.selectedCellCoords).map(
+        (l) => l.coords[l.coords.length - 1]
+      );
+  }
   get rows() {
     const rows = Array<RowProps>();
     this.cells
       .sort((a, b) => a.coords.x - b.coords.x)
-      .sort((a, b) => a.coords.y - b.coords.y)
+      .sort((a, b) => b.coords.y - a.coords.y) // Note: because Y axis decreases downwards, reverse this sorting.
       .forEach((c) => {
         const { x, y } = c.coords;
         const row = rows.find((r) => r.yIndex === y);
@@ -53,6 +60,7 @@ class Game {
             cell!.lineDirections!.push(d);
         });
       });
+      console.debug("Lines:", this.lines);
     });
   }
   async initiateBoard() {
@@ -90,9 +98,29 @@ class Game {
     }
     return possibleLines;
   }
-  tryCompleteLine(coord2: Coords) {}
-  getLineForCoords(c1: Coords, c2: Coords) {
-    const direction = getDirectionForCoords(c1, c2);
+  tryCompleteLine(c2: Coords) {
+    const c1 = this.selectedCellCoords;
+    if (!c1) return;
+    else {
+      const line = this.getLineForCoords(c1, c2);
+      for (const { x, y } of line.coords) this.cellAt(x, y)!.isOpened = true;
+      this.lines.push(line);
+      this.selectedCellCoords = undefined;
+    }
+  }
+  getLineForCoords(c1: Coords, c2: Coords): Line {
+    const d = getDirectionForCoords(c1, c2);
+    let c = c1;
+    return new Line(
+      [c1].concat(
+        Array(4)
+          .fill(0)
+          .map((_) => {
+            c = getNextCoords(c, d);
+            return c;
+          })
+      )
+    );
   }
 }
 
@@ -112,6 +140,7 @@ export enum GameState {
 decorate(Game, {
   selectedCellCoords: observable,
   highlightedCoords: computed,
+  endOfLineCoords: computed,
   lines: observable,
   rows: computed,
   cells: observable,
