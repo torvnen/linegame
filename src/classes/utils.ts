@@ -22,12 +22,58 @@ export const initialCellCoords: Array<Coords> = (() => {
   let y = -5;
   directions.forEach((d) => {
     coords.push({ x, y });
-    const { isRtl, isLtr, isUtd, isDtu } = dissectDirection(d);
-    x = isLtr ? (x + 1 === 0 ? 1 : x + 1) : isRtl ? (x - 1 === 0 ? -1 : x - 1) : x;
-    y = isUtd ? (y + 1 === 0 ? 1 : y + 1) : isDtu ? (y - 1 === 0 ? -1 : y - 1) : y;
+    const {
+      isLeft: isRtl,
+      isRight: isLtr,
+      isDown: isUtd,
+      isUp: isDtu,
+    } = dissectDirection(d);
+    x = isLtr
+      ? x + 1 === 0
+        ? 1
+        : x + 1
+      : isRtl
+      ? x - 1 === 0
+        ? -1
+        : x - 1
+      : x;
+    y = isUtd
+      ? y + 1 === 0
+        ? 1
+        : y + 1
+      : isDtu
+      ? y - 1 === 0
+        ? -1
+        : y - 1
+      : y;
   });
   return coords;
 })();
+
+export function getDirectionForCoords(c1: Coords, c2: Coords) {
+  let d = Direction.None;
+  if (c1.x < c2.x) d |= Direction.Right;
+  else if (c1.x > c2.x) d |= Direction.Left;
+  if (c1.y < c2.y) d |= Direction.Up;
+  else if (c1 > c2) d |= Direction.Down;
+  return d;
+}
+
+export function getNextCoords(coords: Coords, direction: Direction): Coords {
+  const d = dissectDirection(direction);
+  let { x, y } = coords;
+  if (d.isUp) y = sumUntilNotZero(y, 1);
+  if (d.isDown) y = sumUntilNotZero(y, -1);
+  if (d.isRight) x = sumUntilNotZero(x, 1);
+  if (d.isLeft) x = sumUntilNotZero(x, -1);
+  return { x, y };
+}
+
+export function sumUntilNotZero(a: number, sumToAdd: number): number {
+  return a + sumToAdd === 0
+    ? sumUntilNotZero(a + sumToAdd, sumToAdd)
+    : a + sumToAdd;
+}
 
 export const initialGameGrid = ((): Array<Coords> => {
   const grid = [...initialCellCoords];
