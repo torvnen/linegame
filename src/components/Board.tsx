@@ -16,7 +16,7 @@ export const Board = (props: { game: Game }) => {
     <table style={style}>
       <tbody>
         {props.game.grid.map((row) => (
-          <Row key={row.yIndex} {...row} />
+          <Row game={props.game} key={row.yIndex} {...row} />
         ))}
       </tbody>
     </table>

@@ -3,12 +3,14 @@ import Coords from "./Coords";
 import { BOARD_MATRIX_SIZE } from "./constants";
 import { Cell, CellProps } from "../components/Cell";
 import { RowProps } from "../components/Row";
+import { decorate, observe, observable } from "mobx";
 
-export default class Game {
+class Game {
   readonly grid = Array<RowProps>();
   get orderedGrid(): Array<Array<CellProps>> | null {
     return null;
   }
+  selectedCellCoords: Coords | undefined
   static readonly origo = { x: 0, y: 0 };
   constructor() {
     for (let y = -9; y <= 9; y++) {
@@ -44,3 +46,9 @@ export enum GameState {
   Started,
   Finished,
 }
+
+decorate(Game, {
+  selectedCellCoords: observable
+})
+
+export default Game
