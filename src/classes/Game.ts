@@ -133,7 +133,7 @@ class Game {
       const line = this.getLineForCoords(c1, c2)!;
       for (const { x, y } of line.coords) {
         const c = this.cellAt(x, y);
-        if (c!.isOpened) {
+        if (!c!.isOpened) {
           c!.isOpened = true;
           log.i("Opened cell at ", coordsToString(c!.coords));
         }
