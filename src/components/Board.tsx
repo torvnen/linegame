@@ -9,7 +9,7 @@ import { observer } from "mobx-react";
 
 const style: CSSProperties = {
   width: BOARD_MATRIX_SIZE * CELL_SIZE,
-  margin: "auto",
+  margin: "auto"
 };
 
 export const Board = observer((props: { game: Game }) => {
@@ -19,7 +19,7 @@ export const Board = observer((props: { game: Game }) => {
     });
   }, [props.game]);
   return (
-    <table style={style}>
+    <table cellSpacing={0} style={style}>
       <tbody>
         {props.game.rows.map((row) => (
           <Row game={props.game} key={row.yIndex} {...row} />

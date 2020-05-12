@@ -5,11 +5,9 @@ import {
   sumUntilNotZero,
 } from "./utils";
 import Coords from "./Coords";
-import { BOARD_MATRIX_SIZE } from "./constants";
-import { Cell, CellProps } from "../components/Cell";
 import { RowProps } from "../components/Row";
-import { decorate, observe, observable, computed, autorun } from "mobx";
-import { allDirections, dissectDirection, Direction } from "./Direction";
+import { decorate, observable, computed, autorun } from "mobx";
+import { allDirections } from "./Direction";
 import CellModel from "./CellModel";
 
 class Game {
@@ -37,7 +35,7 @@ class Game {
       .sort((a, b) => a.coords.x - b.coords.x)
       .sort((a, b) => b.coords.y - a.coords.y) // Note: because Y axis decreases downwards, reverse this sorting.
       .forEach((c) => {
-        const { x, y } = c.coords;
+        const { y } = c.coords;
         const row = rows.find((r) => r.yIndex === y);
         if (!row) rows.push({ yIndex: y, cells: [c], game: this });
         else row.cells.push(c);
