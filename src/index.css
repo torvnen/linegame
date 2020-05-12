@@ -40,6 +40,9 @@ code {
 .line-right-up {
   background-image: url('img/line_right_up.png')
 }
+.line-right-down.line-right-up {
+  background-image: url('img/line_right_down.png'), url('img/line_right_up.png')
+}
 .line-right-down.line-horizontal {
   background-image: url('img/line_right_down.png'), url('img/line_horizontal.png')
 }
