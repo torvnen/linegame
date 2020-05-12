@@ -6,23 +6,26 @@ import { BOARD_MATRIX_SIZE, CELL_SIZE } from "../classes/constants";
 import { Row } from "./Row";
 import { autorun } from "mobx";
 import { observer } from "mobx-react";
+import Menu from "./Menu";
 
 const style: CSSProperties = {
   width: BOARD_MATRIX_SIZE * CELL_SIZE,
-  margin: "auto"
+  margin: "auto",
 };
 
 export const Board = observer((props: { game: Game }) => {
+  const { game } = props;
   React.useEffect(() => {
     autorun(() => {
-      console.debug("highlightedCoords: ", props.game!.highlightedCoords);
+      console.debug("highlightedCoords: ", game.highlightedCoords);
     });
-  }, [props.game]);
+  }, [game]);
   return (
     <table cellSpacing={0} style={style}>
+      <Menu game={game} />
       <tbody>
-        {props.game.rows.map((row) => (
-          <Row game={props.game} key={row.yIndex} {...row} />
+        {game.rows.map((row) => (
+          <Row game={game} key={row.yIndex} {...row} />
         ))}
       </tbody>
     </table>

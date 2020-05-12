@@ -22,6 +22,9 @@ class Game {
         .map((l) => l.coords)
         .reduce((prev, curr) => prev.concat(curr), []);
   }
+  get lineCount(): number {
+    return this.lines?.length || 0;
+  }
   get endOfLineCoords(): Array<Coords> {
     if (!this.selectedCellCoords) return [];
     else
@@ -142,6 +145,7 @@ decorate(Game, {
   lines: observable,
   rows: computed,
   cells: observable,
+  lineCount: computed,
 });
 
 export default Game;
