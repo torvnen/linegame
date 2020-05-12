@@ -14,7 +14,7 @@ import {
   directionToString,
 } from "./Direction";
 import CellModel from "./CellModel";
-import log, { LogLevel } from "../classes/Log";
+import log, { LogLevel, decreaseLogLevel, setLogLevel } from "../classes/Log";
 
 class Game {
   static readonly origo = { x: 0, y: 0 };
@@ -90,6 +90,8 @@ class Game {
     return this.cells.find((c) => c.coords.x === x && c.coords.y === y);
   }
   getPossibleLines(coords: Coords): Line[] {
+    const ll = log.MIN_LEVEL;
+    if (ll < LogLevel.Info) setLogLevel(LogLevel.Info); // skip debug logs for a while
     const possibleLines = Array<Line>();
     for (const direction of allDirections()) {
       let { x, y } = coords;
@@ -100,7 +102,9 @@ class Game {
         lineCoords.push({ x, y });
         const cell = this.cellAt(x, y);
         if (!cell?.isOpened) unopenedCells++;
-        if (!cell?.lineDirections?.some((ld) => ld === direction)) lineLength++;
+        if (!cell?.lineDirections?.some((ld) => ld === direction)) {
+          lineLength++;
+        }
 
         let next = getNextCoords({ x, y }, direction);
         x = next.x;
@@ -108,7 +112,7 @@ class Game {
       }
       if (lineLength === 5 && unopenedCells <= 1) {
         const l = new Line(lineCoords);
-        log.d(
+        log.i(
           "Possible line from coords %s to direction %s: %s",
           coordsToString(coords),
           directionToString(direction),
@@ -117,6 +121,7 @@ class Game {
         possibleLines.push(l);
       }
     }
+    setLogLevel(ll);
     return possibleLines;
   }
   tryCompleteLine(c2: Coords) {

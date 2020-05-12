@@ -33,16 +33,15 @@ class Log {
   }
 }
 
-decorate(Log, {
-  minLevel: computed,
-  MIN_LEVEL: observable,
-});
-
 const log = new Log();
 
 export function decreaseLogLevel() {
   if (log.MIN_LEVEL - 1 === -1) log.MIN_LEVEL = LogLevel.Error;
   else log.MIN_LEVEL--;
+}
+
+export function setLogLevel(level: LogLevel) {
+  log.MIN_LEVEL = level;
 }
 
 export default log;

@@ -1,27 +1,27 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Old versions of Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
-.cell {    
+.cell {
   background-position: center;
   background-size: 110%;
 }
@@ -29,41 +29,49 @@ code {
   box-shadow: inset 0px 0px 1px 1px #666;
 }
 .line-vertical {
-  background-image: url('img/line_vertical.png')
+  background-image: url("img/line_vertical.png");
 }
 .line-horizontal {
-  background-image: url('img/line_horizontal.png')
+  background-image: url("img/line_horizontal.png");
 }
 .line-right-down {
-  background-image: url('img/line_right_down.png')
+  background-image: url("img/line_right_down.png");
 }
 .line-right-up {
-  background-image: url('img/line_right_up.png')
+  background-image: url("img/line_right_up.png");
 }
 .line-right-down.line-right-up {
-  background-image: url('img/line_right_down.png'), url('img/line_right_up.png')
+  background-image: url("img/line_right_down.png"), url("img/line_right_up.png");
 }
 .line-right-down.line-horizontal {
-  background-image: url('img/line_right_down.png'), url('img/line_horizontal.png')
+  background-image: url("img/line_right_down.png"),
+    url("img/line_horizontal.png");
 }
 .line-right-down.line-vertical {
-  background-image: url('img/line_right_down.png'), url('img/line_vertical.png')
+  background-image: url("img/line_right_down.png"), url("img/line_vertical.png");
 }
 .line-right-up.line-horizontal {
-  background-image: url('img/line_right_up.png'), url('img/line_horizontal.png')
+  background-image: url("img/line_right_up.png"), url("img/line_horizontal.png");
 }
 .line-right-up.line-vertical {
-  background-image: url('img/line_right_up.png'), url('img/line_vertical.png')
+  background-image: url("img/line_right_up.png"), url("img/line_vertical.png");
 }
 .line-horizontal.line-vertical {
-  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png')
+  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png");
 }
 .line-horizontal.line-vertical.line-right-down {
-  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_down.png')
+  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
+    url("img/line_right_down.png");
 }
 .line-horizontal.line-vertical.line-right-up {
-  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_up.png')
+  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
+    url("img/line_right_up.png");
+}
+.line-vertical.line-right-up.line-right-down {
+  background-image: url("img/line_right_down.png"), url("img/line_vertical.png"),
+    url("img/line_right_up.png");
 }
 .line-horizontal.line-vertical.line-right-down.line-right-up {
-  background-image: url('img/line_horizontal.png'), url('img/line_vertical.png'), url('img/line_right_down.png'), url('img/line_right_up.png')
+  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
+    url("img/line_right_down.png"), url("img/line_right_up.png");
 }
