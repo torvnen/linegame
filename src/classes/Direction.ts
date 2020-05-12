@@ -19,15 +19,12 @@ export function dissectDirection(d: Direction) {
 
 export function directionToString(d: Direction) {
   const dir = dissectDirection(d);
-  return dir.isUp
-    ? "up"
-    : "" + dir.isDown
-    ? "down"
-    : "" + dir.isRight
-    ? "right"
-    : "" + dir.isLeft
-    ? "left"
-    : "";
+  return (
+    (dir.isUp ? "up" : "") +
+    (dir.isDown ? "down" : "") +
+    (dir.isRight ? "right" : "") +
+    (dir.isLeft ? "left" : "")
+  );
 }
 
 export function coordsToString(c: Coords | Coords[]): String {

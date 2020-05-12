@@ -4,7 +4,7 @@ import {
   getNextCoords,
   sumUntilNotZero,
 } from "./utils";
-import Coords from "./Coords";
+import Coords, { areCoordsEqual as coordsAreEqual } from "./Coords";
 import { RowProps } from "../components/Row";
 import { decorate, observable, computed, autorun } from "mobx";
 import {
@@ -106,8 +106,16 @@ class Game {
         x = next.x;
         y = next.y;
       }
-      if (lineLength === 5 && unopenedCells <= 1)
-        possibleLines.push(new Line(lineCoords));
+      if (lineLength === 5 && unopenedCells <= 1) {
+        const l = new Line(lineCoords);
+        log.d(
+          "Possible line from coords %s to direction %s: %s",
+          coordsToString(coords),
+          directionToString(direction),
+          coordsToString(lineCoords)
+        );
+        possibleLines.push(l);
+      }
     }
     return possibleLines;
   }
@@ -117,7 +125,12 @@ class Game {
       log.w("Could not complete line due to selected coords being falsy.");
       return;
     } else {
-      const line = this.getLineForCoords(c1, c2);
+      log.i(
+        "Attempting to complete line from %o to %o",
+        coordsToString(c1),
+        coordsToString(c2)
+      );
+      const line = this.getLineForCoords(c1, c2)!;
       for (const { x, y } of line.coords) {
         const c = this.cellAt(x, y);
         if (c!.isOpened) {
@@ -127,39 +140,30 @@ class Game {
       }
       this.lines.push(line);
       log.d(
-        "Added line to collection. There are now %o lines.",
+        "Added line at %s. Line count: %o.",
+        coordsToString(line.coords),
         this.lineCount
       );
       this.selectedCellCoords = undefined;
       log.d("Reset selected cell coords.");
     }
   }
-  getLineForCoords(c1: Coords, c2: Coords): Line {
-    const d = getDirectionForCoords(c1, c2);
-    let c = c1;
-    const l = new Line(
-      [c1].concat(
-        Array(4)
-          .fill(0)
-          .map((_) => {
-            c = getNextCoords(c, d);
-            return c;
-          })
-      )
+  getLineForCoords(c1: Coords, c2: Coords): Line | undefined {
+    return this.getPossibleLines(c1).find((l) =>
+      l.coords.some((c) => coordsAreEqual(c, c2))
     );
-    log.d(
-      "Line for coords %o in direction %s: %o",
-      coordsToString([c1, c2]),
-      directionToString(d),
-      coordsToString(l.coords)
-    );
-    return l;
   }
 }
 
 export class Line {
   get direction(): Direction {
-    return getDirectionForCoords(this.coords[0], this.coords[1]);
+    const d = getDirectionForCoords(this.coords[0], this.coords[1]);
+    if (d === Direction.None)
+      log.w(
+        "Coords %o resulted in a 0-direction.",
+        coordsToString([this.coords[0], this.coords[1]])
+      );
+    return d;
   }
   constructor(public coords: Coords[]) {}
 }

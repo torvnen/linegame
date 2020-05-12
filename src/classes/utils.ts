@@ -1,6 +1,12 @@
-import { Direction, dissectDirection } from "./Direction";
+import {
+  Direction,
+  dissectDirection,
+  coordsToString,
+  directionToString,
+} from "./Direction";
 import Coords from "./Coords";
 import { BOARD_MATRIX_SIZE } from "./constants";
+import log from "./Log";
 
 export const initialCellCoords: Array<Coords> = (() => {
   const coords = Array<Coords>();
@@ -55,7 +61,7 @@ export function getDirectionForCoords(c1: Coords, c2: Coords) {
   if (c1.x < c2.x) d |= Direction.Right;
   else if (c1.x > c2.x) d |= Direction.Left;
   if (c1.y < c2.y) d |= Direction.Up;
-  else if (c1 > c2) d |= Direction.Down;
+  else if (c1.y > c2.y) d |= Direction.Down;
   return d;
 }
 
@@ -66,6 +72,7 @@ export function getClassNamesForLineDirections(
   const a = Array<String>();
   for (const direction of directions) {
     const d = dissectDirection(direction);
+    log.d("Direction %s (%s): %s", direction, directionToString(direction), JSON.stringify(d));
     if ((d.isUp && d.isRight) || (d.isDown && d.isLeft))
       a.push("line-right-up");
     if ((d.isDown && d.isRight) || (d.isUp && d.isLeft))
@@ -75,7 +82,15 @@ export function getClassNamesForLineDirections(
     if ((d.isRight || d.isLeft) && !d.isUp && !d.isDown)
       a.push("line-horizontal");
   }
-  return a.join(" ");
+  const s = a.join(" ");
+  log.d(
+    `Directions [${directions
+      .map(directionToString)
+      .join(", ")}] resulted in className=%s`,
+    s
+  );
+
+  return s;
 }
 
 export function getNextCoords(coords: Coords, direction: Direction): Coords {
@@ -85,6 +100,12 @@ export function getNextCoords(coords: Coords, direction: Direction): Coords {
   if (d.isDown) y = sumUntilNotZero(y, -1);
   if (d.isRight) x = sumUntilNotZero(x, 1);
   if (d.isLeft) x = sumUntilNotZero(x, -1);
+  // log.d(
+  //   "Next coords from %s in direction %s is at %s",
+  //   coordsToString(coords),
+  //   directionToString(direction),
+  //   coordsToString({ x, y })
+  // );
   return { x, y };
 }
 
