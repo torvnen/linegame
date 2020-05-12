@@ -1,14 +1,19 @@
 import React from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
+import Log, { decreaseLogLevel } from "../classes/Log";
 
 const Menu = observer((props: { game: Game }) => {
   return (
     <thead>
       <tr style={{ height: 40 }}>
         <td colSpan={2}>Points:</td>
-        <td colSpan={3}>{props.game.lineCount}</td>
-        <td colSpan={5} />
+        <td colSpan={2}>{props.game.lineCount}</td>
+        <td colSpan={3}>
+          <button onClick={() => decreaseLogLevel()}>
+            LogLevel-- ({Log.minLevel})
+          </button>
+        </td>
         <td colSpan={2}>
           <button>Load</button>
         </td>

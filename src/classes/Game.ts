@@ -7,8 +7,14 @@ import {
 import Coords from "./Coords";
 import { RowProps } from "../components/Row";
 import { decorate, observable, computed, autorun } from "mobx";
-import { allDirections } from "./Direction";
+import {
+  allDirections,
+  Direction,
+  coordsToString,
+  directionToString,
+} from "./Direction";
 import CellModel from "./CellModel";
+import log, { LogLevel } from "../classes/Log";
 
 class Game {
   static readonly origo = { x: 0, y: 0 };
@@ -52,16 +58,22 @@ class Game {
 
     this.initiateBoard();
     autorun(() => {
+      // As {this.lines} is a MobX observable,
+      // * this will run each times the collection is updated.
       this.lines.forEach((l) => {
         l.coords.forEach(({ x, y }) => {
           const cell = this.cellAt(x, y);
           const d = l.direction;
-          if (!cell!.lineDirections) cell!.lineDirections = [d];
-          else if (!cell!.lineDirections!.some((ld) => ld === d))
-            cell!.lineDirections!.push(d);
+          if (!cell!.lineDirections.some((ld) => ld === d)) {
+            cell!.lineDirections.push(d);
+            log.d(
+              "Added direction (%o) to cell at %o",
+              directionToString(d),
+              coordsToString(cell!.coords)
+            );
+          }
         });
       });
-      console.debug("Lines:", this.lines);
     });
   }
   async initiateBoard() {
@@ -101,18 +113,31 @@ class Game {
   }
   tryCompleteLine(c2: Coords) {
     const c1 = this.selectedCellCoords;
-    if (!c1) return;
-    else {
+    if (!c1) {
+      log.w("Could not complete line due to selected coords being falsy.");
+      return;
+    } else {
       const line = this.getLineForCoords(c1, c2);
-      for (const { x, y } of line.coords) this.cellAt(x, y)!.isOpened = true;
+      for (const { x, y } of line.coords) {
+        const c = this.cellAt(x, y);
+        if (c!.isOpened) {
+          c!.isOpened = true;
+          log.i("Opened cell at ", coordsToString(c!.coords));
+        }
+      }
       this.lines.push(line);
+      log.d(
+        "Added line to collection. There are now %o lines.",
+        this.lineCount
+      );
       this.selectedCellCoords = undefined;
+      log.d("Reset selected cell coords.");
     }
   }
   getLineForCoords(c1: Coords, c2: Coords): Line {
     const d = getDirectionForCoords(c1, c2);
     let c = c1;
-    return new Line(
+    const l = new Line(
       [c1].concat(
         Array(4)
           .fill(0)
@@ -122,11 +147,18 @@ class Game {
           })
       )
     );
+    log.d(
+      "Line for coords %o in direction %s: %o",
+      coordsToString([c1, c2]),
+      directionToString(d),
+      coordsToString(l.coords)
+    );
+    return l;
   }
 }
 
 export class Line {
-  get direction() {
+  get direction(): Direction {
     return getDirectionForCoords(this.coords[0], this.coords[1]);
   }
   constructor(public coords: Coords[]) {}
