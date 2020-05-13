@@ -42,7 +42,9 @@ class Game {
   get rows() {
     const rows = Array<RowProps>();
     this.cells
+      .slice() // MobX
       .sort((a, b) => a.coords.x - b.coords.x)
+      .slice()
       .sort((a, b) => b.coords.y - a.coords.y) // Note: because Y axis decreases downwards, reverse this sorting.
       .forEach((c) => {
         const { y } = c.coords;
@@ -57,22 +59,23 @@ class Game {
       for (let x = -9; x <= 9; x = sumUntilNotZero(x, 1))
         this.cells.push(new CellModel({ x, y }));
 
-    this.initiateBoard();
-    autorun(() => {
-      // As {this.lines} is a MobX observable,
-      // * this will run each times the collection is updated.
-      this.lines.forEach((l) => {
-        l.coords.forEach(({ x, y }) => {
-          const cell = this.cellAt(x, y);
-          const d = l.direction;
-          if (!cell!.lineDirections.some((ld) => ld === d)) {
-            cell!.lineDirections.push(d);
-            log.d(
-              "Added direction (%o) to cell at %o",
-              directionToString(d),
-              coordsToString(cell!.coords)
-            );
-          }
+    this.initiateBoard().then(() => {
+      autorun(() => {
+        // As {this.lines} is a MobX observable,
+        // * this will run each times the collection is updated.
+        this.lines.forEach(({ coords, direction }) => {
+          coords.forEach(({ x, y }) => {
+            const cell = this.cellAt(x, y)!;
+            if (!cell.isOpened) cell.isOpened = true;
+            if (!cell.lineDirections.some((ld) => ld === direction)) {
+              cell.lineDirections.push(direction);
+              log.d(
+                "Added direction (%o) to cell at %o",
+                directionToString(direction),
+                coordsToString(cell!.coords)
+              );
+            }
+          });
         });
       });
     });
@@ -103,7 +106,11 @@ class Game {
         lineCoords.push({ x, y });
         const cell = this.cellAt(x, y);
         if (!cell?.isOpened) unopenedCells++;
-        if (!cell?.lineDirections?.some((ld) => ld === direction || directionsOverlap(ld, direction))) {
+        if (
+          !cell?.lineDirections?.some(
+            (ld) => ld === direction || directionsOverlap(ld, direction)
+          )
+        ) {
           lineLength++;
         }
 

@@ -2,6 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import Log, { decreaseLogLevel } from "../classes/Log";
+import { newGame, saveGame, loadGame } from "../App";
 
 const Menu = observer((props: { game: Game }) => {
   return (
@@ -15,13 +16,13 @@ const Menu = observer((props: { game: Game }) => {
           </button>
         </td>
         <td colSpan={2}>
-          <button>Load</button>
+          <button onClick={() => loadGame()}>Load</button>
         </td>
         <td colSpan={2}>
-          <button>Save</button>
+          <button onClick={() => saveGame()}>Save</button>
         </td>
         <td colSpan={5} style={{ textAlign: "right" }}>
-          <button>New game</button>
+          <button onClick={() => newGame()}>New game</button>
         </td>
       </tr>
       {/* <tr style={{ height: 10 }}>
