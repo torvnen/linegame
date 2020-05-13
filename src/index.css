@@ -63,6 +63,10 @@ code {
   background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
     url("img/line_right_down.png");
 }
+.line-horizontal.line-right-down.line-right-up {
+  background-image: url("img/line_horizontal.png"), url("img/line_right_up.png"),
+    url("img/line_right_down.png");
+}
 .line-horizontal.line-vertical.line-right-up {
   background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
     url("img/line_right_up.png");

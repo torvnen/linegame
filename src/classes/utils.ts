@@ -75,7 +75,11 @@ export function directionsOverlap(d1: Direction, d2: Direction): boolean {
     ? true
     : dir1.isRight && dir1.isUp && dir2.isLeft && dir2.isDown // Diagonal 1: "/"
     ? true
+    : dir2.isRight && dir2.isUp && dir1.isLeft && dir1.isDown // Diagonal 1 with reversed comparison
+    ? true
     : dir1.isLeft && dir1.isUp && dir2.isRight && dir2.isDown // Diagonal 2: "\"
+    ? true
+    : dir2.isLeft && dir2.isUp && dir1.isRight && dir1.isDown // Diagonal 2 with reversed comparison
     ? true
     : false;
 }
