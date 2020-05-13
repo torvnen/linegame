@@ -9,11 +9,20 @@ export enum Direction {
 }
 
 export function dissectDirection(d: Direction) {
+  const [isRight, isLeft, isDown, isUp] = [
+    (d & Direction.Right) === Direction.Right,
+    (d & Direction.Left) === Direction.Left,
+    (d & Direction.Down) === Direction.Down,
+    (d & Direction.Up) === Direction.Up,
+  ];
   return {
-    isRight: (d & Direction.Right) === Direction.Right,
-    isLeft: (d & Direction.Left) === Direction.Left,
-    isDown: (d & Direction.Down) === Direction.Down,
-    isUp: (d & Direction.Up) === Direction.Up,
+    isRight,
+    isLeft,
+    isDown,
+    isUp,
+    isDiagonal: (isUp || isDown) && (isRight || isLeft),
+    isHorizontal: (isRight || isLeft) && !(isUp || isDown),
+    isVertical: (isUp || isDown) && !(isRight || isLeft),
   };
 }
 

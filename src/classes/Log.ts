@@ -2,6 +2,7 @@ import { decorate, computed, observable } from "mobx";
 
 export enum LogLevel {
   None = 0,
+  Verbose,
   Debug,
   Info,
   Warning,
@@ -13,6 +14,17 @@ class Log {
 
   get minLevel(): String {
     return LogLevel[this.MIN_LEVEL];
+  }
+  group(label: String) {
+    console.groupCollapsed(label);
+  }
+  groupEnd() {
+    console.groupEnd();
+  }
+  v(message?: any, ...optionalParams: any[]) {
+    if (this.MIN_LEVEL == LogLevel.Verbose) {
+      console.debug(message, ...optionalParams);
+    }
   }
   d(message?: any, ...optionalParams: any[]) {
     if (this.MIN_LEVEL !== LogLevel.None && this.MIN_LEVEL <= LogLevel.Debug) {

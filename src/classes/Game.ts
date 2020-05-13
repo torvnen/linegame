@@ -3,6 +3,7 @@ import {
   getDirectionForCoords,
   getNextCoords,
   sumUntilNotZero,
+  directionsOverlap,
 } from "./utils";
 import Coords, { areCoordsEqual as coordsAreEqual } from "./Coords";
 import { RowProps } from "../components/Row";
@@ -102,7 +103,7 @@ class Game {
         lineCoords.push({ x, y });
         const cell = this.cellAt(x, y);
         if (!cell?.isOpened) unopenedCells++;
-        if (!cell?.lineDirections?.some((ld) => ld === direction)) {
+        if (!cell?.lineDirections?.some((ld) => ld === direction || directionsOverlap(ld, direction))) {
           lineLength++;
         }
 

@@ -65,14 +65,35 @@ export function getDirectionForCoords(c1: Coords, c2: Coords) {
   return d;
 }
 
+export function directionsOverlap(d1: Direction, d2: Direction): boolean {
+  if (d1 === d2) return true;
+  const [dir1, dir2] = [dissectDirection(d1), dissectDirection(d2)];
+  // Vertical line
+  return dir1.isVertical && dir2.isVertical // Vertical: "|"
+    ? true
+    : dir1.isHorizontal && dir2.isHorizontal // Horizontal: "-"
+    ? true
+    : dir1.isRight && dir1.isUp && dir2.isLeft && dir2.isDown // Diagonal 1: "/"
+    ? true
+    : dir1.isLeft && dir1.isUp && dir2.isRight && dir2.isDown // Diagonal 2: "\"
+    ? true
+    : false;
+}
+
 export function getClassNamesForLineDirections(
   directions: Direction[]
 ): String {
   if (!Array.isArray(directions) || directions.length === 0) return "";
   const a = Array<String>();
+  log.group("getClassNamesForLineDirections");
   for (const direction of directions) {
     const d = dissectDirection(direction);
-    log.d("Direction %s (%s): %s", direction, directionToString(direction), JSON.stringify(d));
+    log.d(
+      "Direction %s (%s): %s",
+      direction,
+      directionToString(direction),
+      JSON.stringify(d)
+    );
     if ((d.isUp && d.isRight) || (d.isDown && d.isLeft))
       a.push("line-right-up");
     if ((d.isDown && d.isRight) || (d.isUp && d.isLeft))
@@ -83,12 +104,13 @@ export function getClassNamesForLineDirections(
       a.push("line-horizontal");
   }
   const s = a.join(" ");
-  log.d(
+  log.v(
     `Directions [${directions
       .map(directionToString)
       .join(", ")}] resulted in className=%s`,
     s
   );
+  log.groupEnd();
 
   return s;
 }
