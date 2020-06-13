@@ -3,6 +3,7 @@ import Game, { Line } from "./classes/Game";
 import { Board } from "./components/Board";
 import { decorate, observable } from "mobx";
 import { observer } from "mobx-react";
+import { LOCALSTORAGE_STATE_KEY } from "./classes/constants";
 
 /** Because React will not re-render by default if the 'game' object
  * changes, use MobX to strongly bind it.
@@ -28,19 +29,20 @@ export function newGame(): void {
   gameWrapper.game = new Game();
 }
 
-/** Save the current line state to Local. 
+/** Save the current line state to Local.
  * Only the lines matter. The game has no other saveable states.
  */
 export function saveGame(): void {
   const linesJson = JSON.stringify(gameWrapper.game.lines);
-  localStorage.setItem("game_lines", linesJson);
+  localStorage.setItem(LOCALSTORAGE_STATE_KEY, linesJson);
 }
 
 /** @returns Promise. Resolved true if a game was loaded successfully - false if not. */
 export async function loadGame(): Promise<Boolean> {
   // Load the saved state from local
-  const linesJson = localStorage.getItem("game_lines");
+  const linesJson = localStorage.getItem(LOCALSTORAGE_STATE_KEY);
   if (!!linesJson) {
+    // Try-catch could be replaced by a versioning system. CBA.
     try {
       const lines = JSON.parse(linesJson) as Line[];
       gameWrapper.game = new Game();
