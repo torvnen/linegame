@@ -2,21 +2,22 @@ import { decorate, observable } from "mobx";
 import Coords from "./Coords";
 import { Direction, coordsToString, directionToString } from "./Direction";
 
-class CellModel {
+class Cell {
   isOpened = false;
+  tdRef?: React.RefObject<HTMLTableCellElement>;
   readonly lineDirections = Array<Direction>();
   constructor(public readonly coords: Coords) {}
 }
 
-CellModel.prototype.toString = function (): string {
+Cell.prototype.toString = function (): string {
   return `${this.isOpened ? "Opened" : "Closed"} cell ${coordsToString(
     this.coords
   )} (dir=${this.lineDirections.map((d) => directionToString(d)).join(", ")})`;
 };
 
-decorate(CellModel, {
+decorate(Cell, {
   isOpened: observable,
   lineDirections: observable,
 });
 
-export default CellModel;
+export default Cell;

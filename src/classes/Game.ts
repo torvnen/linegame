@@ -1,6 +1,5 @@
 import {
   initialCellCoords,
-  getDirectionForCoords,
   getNextCoords,
   sumUntilNotZero,
   directionsOverlap,
@@ -8,20 +7,17 @@ import {
 import Coords, { areCoordsEqual as coordsAreEqual } from "./Coords";
 import { RowProps } from "../components/Row";
 import { decorate, observable, computed, autorun } from "mobx";
-import {
-  allDirections,
-  Direction,
-  coordsToString,
-  directionToString,
-} from "./Direction";
-import CellModel from "./CellModel";
+import { allDirections, coordsToString, directionToString } from "./Direction";
+import Cell from "./Cell";
 import log, { LogLevel, decreaseLogLevel, setLogLevel } from "../classes/Log";
+import { LineModel } from "./Line";
+import { loadGame } from "../App";
 
 class Game {
   static readonly origo = { x: 0, y: 0 };
-  readonly lines = Array<Line>();
+  readonly lines = Array<LineModel>();
   selectedCellCoords: Coords | undefined;
-  readonly cells = Array<CellModel>();
+  readonly cells = Array<Cell>();
   get highlightedCoords(): Array<Coords> {
     if (!this.selectedCellCoords) return [];
     else
@@ -57,7 +53,7 @@ class Game {
   constructor() {
     for (let y = 9; y >= -9; y = sumUntilNotZero(y, -1))
       for (let x = -9; x <= 9; x = sumUntilNotZero(x, 1))
-        this.cells.push(new CellModel({ x, y }));
+        this.cells.push(new Cell({ x, y }));
 
     this.initiateBoard().then(() => {
       autorun(() => {
@@ -90,13 +86,13 @@ class Game {
       );
     }
   }
-  cellAt(x: number, y: number): CellModel | undefined {
+  cellAt(x: number, y: number): Cell | undefined {
     return this.cells.find((c) => c.coords.x === x && c.coords.y === y);
   }
-  getPossibleLines(coords: Coords): Line[] {
+  getPossibleLines(coords: Coords): LineModel[] {
     const ll = log.MIN_LEVEL;
     if (ll < LogLevel.Info) setLogLevel(LogLevel.Info); // skip debug logs for a while
-    const possibleLines = Array<Line>();
+    const possibleLines = Array<LineModel>();
     for (const direction of allDirections()) {
       let { x, y } = coords;
       let lineLength = 0;
@@ -119,7 +115,7 @@ class Game {
         y = next.y;
       }
       if (lineLength === 5 && unopenedCells <= 1) {
-        const l = new Line(lineCoords);
+        const l = new LineModel(lineCoords);
         log.i(
           "Possible line from coords %s to direction %s: %s",
           coordsToString(coords),
@@ -161,24 +157,11 @@ class Game {
       log.d("Reset selected cell coords.");
     }
   }
-  getLineForCoords(c1: Coords, c2: Coords): Line | undefined {
+  getLineForCoords(c1: Coords, c2: Coords): LineModel | undefined {
     return this.getPossibleLines(c1).find((l) =>
       l.coords.some((c) => coordsAreEqual(c, c2))
     );
   }
-}
-
-export class Line {
-  get direction(): Direction {
-    const d = getDirectionForCoords(this.coords[0], this.coords[1]);
-    if (d === Direction.None)
-      log.w(
-        "Coords %o resulted in a 0-direction.",
-        coordsToString([this.coords[0], this.coords[1]])
-      );
-    return d;
-  }
-  constructor(public coords: Coords[]) {}
 }
 
 export enum GameState {

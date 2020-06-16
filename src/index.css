@@ -79,3 +79,11 @@ code {
   background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
     url("img/line_right_down.png"), url("img/line_right_up.png");
 }
+@keyframes grow {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
