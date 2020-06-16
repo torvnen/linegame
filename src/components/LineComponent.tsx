@@ -26,7 +26,7 @@ export const LineComponent = observer((props: LineComponentProps) => {
         const firstTd = firstTdRef.current;
         const lastTd = lastTdRef.current;
         let transformOrigin = dd.isDiagonal
-          ? `${dd.isRight ? "0%" : "100%"} ${dd.isDown ? " 0%" : " 100%"}`
+          ? `${(dd.isUp ? -0.05 : 0.05) * (lastTd.clientWidth)}px 100%`
           : dd.isVertical
           ? `0% ${dd.isDown ? "0%" : "100%"}`
           : dd.isHorizontal
@@ -55,17 +55,47 @@ export const LineComponent = observer((props: LineComponentProps) => {
             offsetX = firstTd.offsetLeft + 0.75 * firstTd.offsetWidth;
           }
         } else if (dd.isVertical) {
-          offsetX = (firstTd.offsetLeft + firstTd.clientWidth / 2) + 1;
-          length = Math.abs((firstTd.offsetTop - lastTd.offsetTop)) + 0.5 * firstTd.clientHeight
+          offsetX = firstTd.offsetLeft + firstTd.clientWidth / 2 + 1;
+          length =
+            Math.abs(firstTd.offsetTop - lastTd.offsetTop) +
+            0.5 * firstTd.clientHeight;
           if (dd.isUp) {
             offsetY = firstTd.offsetTop + 0.75 * firstTd.offsetHeight;
-            deg = -90
+            deg = -90;
           } else {
             offsetY = firstTd.offsetTop + 0.25 * firstTd.offsetHeight;
-            deg = 90
+            deg = 90;
           }
-        } else {
-        }
+        } else if (dd.isDiagonal) {
+          const offset = 0;
+          offsetX =
+            firstTd.offsetLeft +
+            (dd.isRight ? offset : 1 - offset) * firstTd.clientWidth;
+          offsetY =
+            firstTd.offsetTop +
+            (dd.isDown ? offset : 1 - offset) * firstTd.clientHeight;
+          const endX =
+            lastTd.offsetLeft +
+            (dd.isLeft ? offset : 1 - offset) * lastTd.clientWidth;
+          const endY =
+            lastTd.offsetTop +
+            (dd.isUp ? offset : 1 - offset) * lastTd.clientHeight;
+          length = Math.ceil(Math.sqrt(
+            // Pythagoras
+            Math.pow(Math.ceil(endX - offsetX), 2) +
+              Math.pow(Math.ceil(endY - offsetY), 2)
+          ));
+          deg =
+            dd.isRight && dd.isUp
+              ? 316
+              : dd.isRight && dd.isDown
+              ? 46
+              : dd.isLeft && dd.isDown
+              ? 136
+              : dd.isLeft && dd.isUp
+              ? 226
+              : NaN;
+        } else throw new Error("Invalid direction");
         setStyle({
           ...style,
           left: offsetX,
