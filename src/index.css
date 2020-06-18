@@ -1,8 +1,28 @@
+@font-face {
+  font-family: DMMonoMediumItalic;
+  src: url("./fonts/DMMono-MediumItalic.ttf");
+}
+
+@font-face {
+  font-family: DMMonoLight;
+  src: url("./fonts/DMMono-Light.ttf");
+}
+
+* {
+  font-family: DMMonoLight;
+}
+table * {
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+
+h1 {
+  font-family: DMMonoMediumItalic;
+  margin-bottom: 2px;
+  margin-top: 10px;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -78,4 +98,12 @@ code {
 .line-horizontal.line-vertical.line-right-down.line-right-up {
   background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
     url("img/line_right_down.png"), url("img/line_right_up.png");
+}
+@keyframes grow {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }

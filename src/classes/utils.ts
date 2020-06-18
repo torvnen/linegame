@@ -56,6 +56,27 @@ export const initialCellCoords: Array<Coords> = (() => {
   return coords;
 })();
 
+export function getAngleForDirection(d: Direction): number {
+  const dd = dissectDirection(d);
+  return dd.isHorizontal && dd.isRight
+    ? 0
+    : dd.isRight && dd.isDown
+    ? 45
+    : dd.isVertical && dd.isDown
+    ? 90
+    : dd.isLeft && dd.isDown
+    ? 135
+    : dd.isHorizontal && dd.isLeft
+    ? 180
+    : dd.isLeft && dd.isUp
+    ? 225
+    : dd.isVertical && dd.isUp
+    ? 270
+    : dd.isRight && dd.isUp
+    ? 315
+    : NaN;
+}
+
 export function getDirectionForCoords(c1: Coords, c2: Coords) {
   let d = Direction.None;
   if (c1.x < c2.x) d |= Direction.Right;

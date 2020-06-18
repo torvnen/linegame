@@ -1,13 +1,13 @@
 import React from "react";
-import { CellProps, Cell } from "./Cell";
+import { CellComponentProps, CellComponent } from "./CellComponent";
 import Game from "../classes/Game";
-import CellModel from "../classes/CellModel";
+import Cell from "../classes/Cell";
 
 export const Row = (props: RowProps) => {
   return (
     <tr>
       {props.cells.map((cell) => (
-        <Cell game={props.game} key={cell.coords.x} {...cell} />
+        <CellComponent game={props.game} key={cell.coords.x} {...cell} />
       ))}
     </tr>
   );
@@ -16,5 +16,5 @@ export const Row = (props: RowProps) => {
 export interface RowProps {
   yIndex: number;
   game: Game;
-  cells: Array<CellModel>;
+  cells: Array<Cell>;
 }

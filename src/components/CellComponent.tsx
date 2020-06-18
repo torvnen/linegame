@@ -10,7 +10,7 @@ import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import { Direction } from "../classes/Direction";
 
-function isCellSelected(props: CellProps): boolean {
+function isCellSelected(props: CellComponentProps): boolean {
   const selectedCellCoords = props.game?.selectedCellCoords;
   return (
     selectedCellCoords?.x === props.coords.x &&
@@ -40,20 +40,25 @@ const makeStyle = (
   };
 };
 
-export const Cell = observer((props: CellProps) => {
+export const CellComponent = observer((props: CellComponentProps) => {
+  const tdRef = React.useRef<HTMLTableCellElement>(null);
+  const { game, coords } = props;
   const { x, y } = props.coords;
   const cell = props.game.cellAt(x, y);
   const isHighlighted = props.game.highlightedCoords.some(
     (c) => c.x === x && c.y === y
   );
   const isEndOfLine =
-    isHighlighted &&
-    props.game.endOfLineCoords.some((c) => c.x === x && c.y === y);
+    isHighlighted && game.endOfLineCoords.some((c) => c.x === x && c.y === y);
+  React.useEffect(() => {
+    if (!!cell) cell.tdRef = tdRef;
+  }, [game, coords, x, y]);
   return (
     <td
-      className={`noselect cell ${getClassNamesForLineDirections(
-        cell!.lineDirections
-      )}`}
+      ref={tdRef}
+      className={`noselect cell ${
+        "TODO" || getClassNamesForLineDirections(cell!.lineDirections)
+      }`}
       style={makeStyle(
         isCellSelected(props),
         cell!.isOpened,
@@ -78,7 +83,7 @@ export const Cell = observer((props: CellProps) => {
   );
 });
 
-export interface CellProps {
+export interface CellComponentProps {
   coords: Coords;
   game: Game;
 }

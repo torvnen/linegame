@@ -1,5 +1,6 @@
 import React from "react";
-import Game, { Line } from "./classes/Game";
+import Game from "./classes/Game";
+import { LineModel } from "./classes/Line";
 import { Board } from "./components/Board";
 import { decorate, observable } from "mobx";
 import { observer } from "mobx-react";
@@ -44,13 +45,13 @@ export async function loadGame(): Promise<Boolean> {
   if (!!linesJson) {
     // Try-catch could be replaced by a versioning system. CBA.
     try {
-      const lines = JSON.parse(linesJson) as Line[];
-      gameWrapper.game = new Game();
+      const lines = JSON.parse(linesJson) as LineModel[];
       // Delete all previous lines
       gameWrapper.game.lines.splice(0, gameWrapper.game.lines.length);
+      gameWrapper.game = new Game();
       // Add the saved lines to the game
       lines.forEach((l) => {
-        l = new Line(l.coords); // Copy object, otherwise the getter for Direction will not work.
+        l = new LineModel(l.coords, gameWrapper.game); // Copy object, otherwise the getter for Direction will not work.
         gameWrapper.game.lines.push(l);
       });
       return true;
