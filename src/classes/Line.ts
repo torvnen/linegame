@@ -10,12 +10,10 @@ import { LINE_THICKNESS } from "../components/LineComponent";
 class LineModel {
   get transformOrigin(): string | number | undefined {
     const dd = dissectDirection(this.direction);
-    return dd.isDiagonal
+    return dd.isDiagonal || dd.isHorizontal
       ? `0 50%`
       : dd.isVertical
-      ? `0% ${dd.isDown ? "0%" : "100%"}`
-      : dd.isHorizontal
-      ? `0% 50%`
+      ? `0 100%`
       : undefined;
   }
   get dimensions(): {
@@ -27,43 +25,38 @@ class LineModel {
     const dd = dissectDirection(this.direction);
     const firstTd = this.firstCell!.tdRef!.current!;
     const lastTd = this.lastCell!.tdRef!.current!;
+    const cellWidth = firstTd.offsetWidth;
+    const cellHeight = firstTd.offsetHeight;
 
     let [offsetX, offsetY, lengthPx] = [0, 0, 0];
     if (dd.isHorizontal) {
-      offsetY = firstTd.offsetTop + firstTd.offsetHeight / 2;
+      offsetY = firstTd.offsetTop + cellHeight / 2 - LINE_THICKNESS / 2;
       if (dd.isRight) {
         lengthPx =
-          Math.abs(firstTd.offsetLeft - lastTd.offsetLeft) +
-          0.5 * firstTd.offsetWidth;
-        offsetX = firstTd.offsetLeft + 0.25 * firstTd.offsetWidth;
+          Math.abs(firstTd.offsetLeft - lastTd.offsetLeft) + 0.5 * cellWidth;
+        offsetX = firstTd.offsetLeft + 0.25 * cellWidth;
       } else {
         lengthPx =
-          Math.abs(lastTd.offsetLeft - firstTd.offsetLeft) +
-          0.5 * firstTd.offsetWidth;
-        offsetX = firstTd.offsetLeft + 0.75 * firstTd.offsetWidth;
+          Math.abs(lastTd.offsetLeft - firstTd.offsetLeft) + 0.5 * cellWidth;
+        offsetX = firstTd.offsetLeft + 0.75 * cellWidth;
       }
     } else if (dd.isVertical) {
-      offsetX = firstTd.offsetLeft + firstTd.clientWidth / 2 + 1;
-      lengthPx =
-        Math.abs(firstTd.offsetTop - lastTd.offsetTop) +
-        0.5 * firstTd.clientHeight;
-      if (dd.isUp) {
-        offsetY = firstTd.offsetTop + 0.75 * firstTd.offsetHeight;
-      } else {
-        offsetY = firstTd.offsetTop + 0.25 * firstTd.offsetHeight;
-      }
+      offsetX =
+        firstTd.offsetLeft +
+        cellWidth / 2 +
+        LINE_THICKNESS / (dd.isUp ? 2 : -2);
+      offsetY = firstTd.offsetTop + cellHeight * (dd.isDown ? 0.2 : 0.8) - LINE_THICKNESS;
+      const endY = lastTd.offsetTop + cellHeight * (dd.isUp ? 0.2 : 0.8) - LINE_THICKNESS;
+      lengthPx = Math.abs(endY - offsetY);
     } else if (dd.isDiagonal) {
-      const cellWidth = firstTd.offsetWidth;
-      const cellHeight = firstTd.offsetHeight;
-      console.log("cellWidth", cellWidth);
       const endX = lastTd.offsetLeft + (dd.isLeft ? 0 : cellWidth);
       const endY = lastTd.offsetTop + (dd.isUp ? 0 : cellHeight);
       offsetX = firstTd.offsetLeft + (dd.isRight ? 0 : cellWidth);
       offsetY = firstTd.offsetTop + (dd.isDown ? 0 : cellHeight);
-      lengthPx = Math.ceil(
+      lengthPx = Math.floor(
         Math.sqrt(
           // Pythagoras
-          Math.pow(Math.ceil(endX - offsetX), 2) +
+          Math.pow(Math.floor(endX - offsetX), 2) +
             Math.pow(Math.ceil(endY - offsetY), 2)
         )
       );
