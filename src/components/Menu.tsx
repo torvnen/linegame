@@ -30,12 +30,7 @@ const Menu = observer((props: { game: Game }) => {
           <h1>Linegame</h1>
         </Flexbox>
       </Flexbox>
-      <Flexbox style={{ paddingBottom: 20 }}>
-        <Flexbox style={{ flexGrow: 1 }}>
-          <button style={buttonStyle} onClick={() => decreaseLogLevel()}>
-            LogLevel-- ({Log.minLevel})
-          </button>
-        </Flexbox>
+      <Flexbox>
         <Flexbox>
           <button style={buttonStyle} onClick={() => loadGame()}>
             Load
@@ -49,6 +44,18 @@ const Menu = observer((props: { game: Game }) => {
         <Flexbox>
           <button style={buttonStyle} onClick={() => newGame()}>
             New game
+          </button>
+        </Flexbox>
+      </Flexbox>
+      <Flexbox style={{ paddingBottom: 20 }}>
+        <Flexbox style={{ flexGrow: 1 }}>
+          <button style={buttonStyle} onClick={() => decreaseLogLevel()}>
+            LogLevel-- ({Log.minLevel})
+          </button>
+        </Flexbox>
+        <Flexbox style={{ flexGrow: 1 }}>
+          <button style={buttonStyle} onClick={() => props.game.lines.pop()}>
+            Undo &laquo;
           </button>
         </Flexbox>
         <Flexbox>

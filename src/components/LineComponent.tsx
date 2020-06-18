@@ -11,7 +11,8 @@ export const LineComponent = observer((props: LineComponentProps) => {
   const { lines } = game;
   const [style, setStyle] = React.useState<CSSProperties>({});
   React.useEffect(() => {
-    //const cells = model.coords.map((v, i, a) => game.cellAt(v.x, v.y));
+    /* Draw the container for the line element 
+     * when either model or its coords change */
     if (!!model) {
       const firstTdRef = model.getFirstCell(game)?.tdRef;
       const lastTdRef = model.getLastCell(game)?.tdRef;
@@ -87,13 +88,13 @@ export const LineComponent = observer((props: LineComponentProps) => {
           ));
           deg =
             dd.isRight && dd.isUp
-              ? 316
+              ? 315
               : dd.isRight && dd.isDown
-              ? 46
+              ? 45
               : dd.isLeft && dd.isDown
-              ? 136
+              ? 135
               : dd.isLeft && dd.isUp
-              ? 226
+              ? 225
               : NaN;
         } else throw new Error("Invalid direction");
         setStyle({

@@ -25,7 +25,7 @@ export const Board = observer((props: { game: Game }) => {
   return (
     <div style={{ display: "relative" }}>
       <Menu game={game} />
-      <table ref={tableRef} cellSpacing={0} style={style}>
+      <table ref={tableRef} cellSpacing={1} style={style}>
         <tbody>
           {game.rows.map((row) => (
             <Row game={game} key={row.yIndex} {...row} />
