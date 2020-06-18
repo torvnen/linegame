@@ -1,34 +1,64 @@
-import React from "react";
+import React, { HTMLProps } from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import Log, { decreaseLogLevel } from "../classes/Log";
 import { newGame, saveGame, loadGame } from "../App";
 
+const buttonStyle = { minHeight: 40, margin: "10px 5px" };
+const Flexbox = (props: HTMLProps<HTMLDivElement>) => {
+  return (
+    <div {...props} style={{ display: "flex", ...props.style }}>
+      {props.children}
+    </div>
+  );
+};
 const Menu = observer((props: { game: Game }) => {
   return (
-    <thead>
-      <tr style={{ height: 40 }}>
-        <td colSpan={2}>Points:</td>
-        <td colSpan={2}>{props.game.lineCount}</td>
-        <td colSpan={3}>
-          <button onClick={() => decreaseLogLevel()}>
+    <Flexbox
+      style={{
+        margin: "auto",
+        width: 480,
+        flexDirection: "column",
+        background: "#eee",
+      }}
+    >
+      <Flexbox style={{ padding: "10px 25px 0 25px" }}>
+        <Flexbox style={{ flexGrow: 1 }}>
+          <h1>Linegame</h1>
+        </Flexbox>
+        <Flexbox style={{ transform: "rotateZ(180deg)", paddingBottom: 13 }}>
+          <h1>Linegame</h1>
+        </Flexbox>
+      </Flexbox>
+      <Flexbox style={{ paddingBottom: 20 }}>
+        <Flexbox style={{ flexGrow: 1 }}>
+          <button style={buttonStyle} onClick={() => decreaseLogLevel()}>
             LogLevel-- ({Log.minLevel})
           </button>
-        </td>
-        <td colSpan={2}>
-          <button onClick={() => loadGame()}>Load</button>
-        </td>
-        <td colSpan={2}>
-          <button onClick={() => saveGame()}>Save</button>
-        </td>
-        <td colSpan={5} style={{ textAlign: "right" }}>
-          <button onClick={() => newGame()}>New game</button>
-        </td>
-      </tr>
-      {/* <tr style={{ height: 10 }}>
-        <td colSpan={99} />
-      </tr> */}
-    </thead>
+        </Flexbox>
+        <Flexbox>
+          <button style={buttonStyle} onClick={() => loadGame()}>
+            Load
+          </button>
+        </Flexbox>
+        <Flexbox>
+          <button style={buttonStyle} onClick={() => saveGame()}>
+            Save
+          </button>
+        </Flexbox>
+        <Flexbox>
+          <button style={buttonStyle} onClick={() => newGame()}>
+            New game
+          </button>
+        </Flexbox>
+        <Flexbox>
+          <button style={buttonStyle} onClick={() => loadGame()}>
+            How to Play
+          </button>
+        </Flexbox>
+      </Flexbox>
+      <Flexbox>Points: {props.game.lineCount}</Flexbox>
+    </Flexbox>
   );
 });
 
