@@ -51,7 +51,7 @@ export async function loadGame(): Promise<Boolean> {
       gameWrapper.game = new Game();
       // Add the saved lines to the game
       lines.forEach((l) => {
-        l = new LineModel(l.coords); // Copy object, otherwise the getter for Direction will not work.
+        l = new LineModel(l.coords, gameWrapper.game); // Copy object, otherwise the getter for Direction will not work.
         gameWrapper.game.lines.push(l);
       });
       return true;

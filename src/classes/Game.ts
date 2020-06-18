@@ -55,11 +55,20 @@ class Game {
       for (let x = -9; x <= 9; x = sumUntilNotZero(x, 1))
         this.cells.push(new Cell({ x, y }));
 
-    this.initiateBoard().then(() => {
+    this.initiateBoardAsync().then(() => {
+      let previousLineCount = 0;
       autorun(() => {
         // As {this.lines} is a MobX observable,
         // * this will run each times the collection is updated.
+        if (previousLineCount > this.lines.length) {
+          // A line was deleted (Undo was requested)
+          // Close all dots
+          this.cells.forEach((c) => (c.isOpened = false));
+          // Re-open initial dots
+          this.initiateBoard();
+        }
         this.lines.forEach(({ coords, direction }) => {
+          // Open each cell that has a line over them
           coords.forEach(({ x, y }) => {
             const cell = this.cellAt(x, y)!;
             if (!cell.isOpened) cell.isOpened = true;
@@ -73,22 +82,32 @@ class Game {
             }
           });
         });
+        previousLineCount = this.lines.length;
       });
     });
   }
-  async initiateBoard() {
+  initiateBoard() {
+    for (const coord of initialCellCoords) {
+      this.cellAt(coord.x, coord.y)!.isOpened = true;
+    }
+  }
+  async initiateBoardAsync(animDelayMs: number = 8) {
     for (const coord of initialCellCoords) {
       await new Promise((r: any) =>
         setTimeout(() => {
           this.cellAt(coord.x, coord.y)!.isOpened = true;
           r(true);
-        }, 8)
+        }, animDelayMs)
       );
     }
   }
   cellAt(x: number, y: number): Cell | undefined {
     return this.cells.find((c) => c.coords.x === x && c.coords.y === y);
   }
+  /**
+   * Get all lines that can be drawn from coords
+   * @param {Coords} coords The x and y positions of the cell (something within [-9...9])
+   */
   getPossibleLines(coords: Coords): LineModel[] {
     const ll = log.MIN_LEVEL;
     if (ll < LogLevel.Info) setLogLevel(LogLevel.Info); // skip debug logs for a while
@@ -115,7 +134,7 @@ class Game {
         y = next.y;
       }
       if (lineLength === 5 && unopenedCells <= 1) {
-        const l = new LineModel(lineCoords);
+        const l = new LineModel(lineCoords, this);
         log.i(
           "Possible line from coords %s to direction %s: %s",
           coordsToString(coords),
