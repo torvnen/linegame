@@ -21,7 +21,7 @@ class Game {
   get highlightedCoords(): Array<Coords> {
     if (!this.selectedCellCoords) return [];
     else
-      return this.getPossibleLines(this.selectedCellCoords)
+      return this.possibleLines
         .map((l) => l.coords)
         .reduce((prev, curr) => prev.concat(curr), []);
   }
@@ -30,10 +30,7 @@ class Game {
   }
   get endOfLineCoords(): Array<Coords> {
     if (!this.selectedCellCoords) return [];
-    else
-      return this.getPossibleLines(this.selectedCellCoords).map(
-        (l) => l.coords[l.coords.length - 1]
-      );
+    else return this.possibleLines.map((l) => l.coords[l.coords.length - 1]);
   }
   get rows() {
     const rows = Array<RowProps>();
@@ -108,12 +105,12 @@ class Game {
    * Get all lines that can be drawn from coords
    * @param {Coords} coords The x and y positions of the cell (something within [-9...9])
    */
-  getPossibleLines(coords: Coords): LineModel[] {
+  get possibleLines(): LineModel[] {
     const ll = log.MIN_LEVEL;
     if (ll < LogLevel.Info) setLogLevel(LogLevel.Info); // skip debug logs for a while
     const possibleLines = Array<LineModel>();
     for (const direction of allDirections()) {
-      let { x, y } = coords;
+      let { x, y } = this.selectedCellCoords!!;
       let lineLength = 0;
       let unopenedCells = 0;
       let lineCoords = Array<Coords>();
@@ -137,7 +134,7 @@ class Game {
         const l = new LineModel(lineCoords, this);
         log.i(
           "Possible line from coords %s to direction %s: %s",
-          coordsToString(coords),
+          coordsToString({ x, y }),
           directionToString(direction),
           coordsToString(lineCoords)
         );
@@ -177,7 +174,7 @@ class Game {
     }
   }
   getLineForCoords(c1: Coords, c2: Coords): LineModel | undefined {
-    return this.getPossibleLines(c1).find((l) =>
+    return this.possibleLines.find((l) =>
       l.coords.some((c) => coordsAreEqual(c, c2))
     );
   }
