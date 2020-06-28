@@ -1,12 +1,12 @@
 import React, { HTMLProps } from "react";
-import { useTheme } from "../hooks/useTheme";
+import { useThemeSetter } from "../hooks/useThemeSetter";
 
 const Flexbox = (props: HTMLProps<HTMLDivElement>) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeSetter();
   return (
     <div
       {...props}
-      style={{ display: "flex", color: theme.colors.primary, ...props.style }}
+      style={{ display: "flex", color: theme.palette.text.primary, ...props.style }}
     >
       {props.children}
     </div>

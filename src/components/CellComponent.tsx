@@ -3,7 +3,8 @@ import Coords from "../classes/Coords";
 import { CELL_SIZE } from "../classes/constants";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
-import { Theme, useTheme } from "../hooks/useTheme";
+import { useThemeSetter } from "../hooks/useThemeSetter";
+import { Theme } from "@material-ui/core/styles";
 
 function isCellSelected(props: CellComponentProps): boolean {
   const selectedCellCoords = props.game?.selectedCellCoords;
@@ -24,15 +25,17 @@ const makeStyle = (
     height: CELL_SIZE,
     fontSize: isOpened || isSelected ? 14 : 12,
     textAlign: "center",
-    color: isHighlighted ? theme.colors.success : theme.colors.primary,
+    color: isHighlighted
+      ? theme.palette.text.primary
+      : theme.palette.text.secondary,
     backgroundColor: isEndOfLine
-      ? theme.colors.secondary
+      ? theme.palette.secondary.main
       : isSelected && !isHighlighted
-      ? theme.colors.warning
+      ? theme.palette.error.light
       : isSelected && isHighlighted
-      ? theme.colors.primary
+      ? theme.palette.info.light
       : isHighlighted
-      ? theme.colors.secondary
+      ? theme.palette.info.main
       : "#f9f9f9",
     backgroundSize: "50%",
   };
@@ -48,7 +51,7 @@ export const CellComponent = observer((props: CellComponentProps) => {
   );
   const isEndOfLine =
     isHighlighted && game.endOfLineCoords.some((c) => c.x === x && c.y === y);
-  const { theme } = useTheme();
+  const { theme } = useThemeSetter();
   React.useEffect(() => {
     if (!!cell) cell.tdRef = tdRef;
   }, [game, coords, x, y]);

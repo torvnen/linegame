@@ -5,6 +5,9 @@ import { Board } from "./components/Board";
 import { decorate, observable } from "mobx";
 import { observer } from "mobx-react";
 import { LOCALSTORAGE_STATE_KEY } from "./classes/constants";
+import { ThemeProvider, createMuiTheme, Theme } from "@material-ui/core";
+import { themes } from "./mui-themes";
+import { useThemeSetter } from "./hooks/useThemeSetter";
 
 /** Because React will not re-render by default if the 'game' object
  * changes, use MobX to strongly bind it.
@@ -18,8 +21,13 @@ decorate(GameWrapper, {
 const gameWrapper = new GameWrapper();
 
 /** Rendering root for React */
-const App = observer(function () {
-  return <Board game={gameWrapper.game} />;
+const App = observer(() => {
+  const { theme } = useThemeSetter();
+  return (
+    <ThemeProvider theme={theme}>
+      <Board game={gameWrapper.game} />
+    </ThemeProvider>
+  );
 });
 
 /** Starts a new game

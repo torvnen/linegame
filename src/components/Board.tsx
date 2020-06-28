@@ -8,7 +8,7 @@ import { autorun } from "mobx";
 import { observer } from "mobx-react";
 import Menu from "./Menu";
 import { LineOverlayComponent } from "./LineOverlay";
-import { useTheme } from "../hooks/useTheme";
+import { useThemeSetter } from "../hooks/useThemeSetter";
 import Flexbox from "./Flexbox";
 
 const style: CSSProperties = {
@@ -19,7 +19,7 @@ const style: CSSProperties = {
 export const Board = observer((props: { game: Game }) => {
   const { game } = props;
   const tableRef = React.useRef<HTMLTableElement>(null);
-  const { theme } = useTheme();
+  const { theme } = useThemeSetter();
   // React.useEffect(() => {
   //   autorun(() => {
   //     console.debug("highlightedCoords: ", game.highlightedCoords);
@@ -28,12 +28,11 @@ export const Board = observer((props: { game: Game }) => {
   return (
     <Flexbox
       style={{
-        background: theme.colors.secondary,
-        borderRadius: theme.dimensions?.borderRadius || 0,
+        background: theme.palette.background.default,
         margin: "auto",
         justifyContent: "center",
         flexFlow: "column",
-        border: `1px solid ${theme.colors.primary}`,
+        border: `1px solid ${theme.palette.primary.main}`,
       }}
     >
       <Flexbox
@@ -41,7 +40,8 @@ export const Board = observer((props: { game: Game }) => {
           flexFlow: "column",
           margin: "auto",
           padding: 5,
-          background: theme.colors.success,
+          borderRadius: theme.spacing(1),
+          background: theme.palette.background.paper,
         }}
       >
         <Menu game={game} />

@@ -1,178 +1,111 @@
-import React, { HTMLProps } from "react";
+import React from "react";
+import Drawer from "@material-ui/core/Drawer";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
-import Log, { decreaseLogLevel } from "../classes/Log";
-import { newGame, saveGame, loadGame } from "../App";
-import { useTheme } from "../hooks/useTheme";
-import { updateOverlay } from "./LineOverlay";
+import Title from "./Title";
+import MenuList from "@material-ui/core/MenuList";
+import ListItem from "@material-ui/core/ListItem";
+import ThemeSelector from "./ThemeSelector";
+import { useThemeSetter } from "../hooks/useThemeSetter";
 import Flexbox from "./Flexbox";
-import MenuButton from "./MenuButton";
+import SaveGameIcon from "@material-ui/icons/SaveTwoTone";
+import NewGameIcon from "@material-ui/icons/NoteAddTwoTone";
+import LoadGameIcon from "@material-ui/icons/RestorePageTwoTone";
+import InstructionsIcon from "@material-ui/icons/InfoTwoTone";
+import { saveGame, newGame, loadGame } from "../App";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import { Divider } from "@material-ui/core";
 
-const themeButtonStyle: React.CSSProperties = {
-  fontSize: "120%",
-  cursor: "pointer",
-  margin: "-2px 2px 0 2px",
-};
-const Menu = observer((props: { game: Game }) => {
-  const { themes, theme, setTheme } = useTheme();
-  const [expanded, setExpanded] = React.useState<boolean>(false);
-  const currentThemeIndex = Object.values(themes).indexOf(theme);
-  const themeKeys = Object.keys(themes);
-  const setPreviousTheme = () => {
-    const previousKey =
-      themeKeys[
-        currentThemeIndex > 0 ? currentThemeIndex - 1 : themeKeys.length - 1
-      ];
-    setTheme(themes[previousKey]);
-  };
-  const setNextTheme = () => {
-    const previousKey =
-      themeKeys[
-        currentThemeIndex + 1 < themeKeys.length ? currentThemeIndex + 1 : 0
-      ];
-    setTheme(themes[previousKey]);
-  };
+const MenuLinkItem = (props: {
+  onClick?: () => void;
+  icon?: JSX.Element;
+  text: string;
+  fontSize?: "130%" | "100%";
+}) => {
+  const { icon, onClick, text, fontSize } = props;
   return (
-    <Flexbox
-      style={{
-        margin: "auto",
-        width: 480,
-        flexDirection: "column",
-        background: "#eee",
-      }}
-    >
-      <Flexbox style={{ padding: "10px 25px 0 25px" }}>
-        <Flexbox style={{ flexGrow: 1 }}>
-          <h1 style={{ color: theme.colors.primary }}>Linegame</h1>
+    <ListItem {...onClick} style={{ cursor: "pointer" }}>
+      <Button fullWidth>
+        <Flexbox style={{ width: "70%" }}>
+          <span
+            style={{ width: 40, marginRight: fontSize === "100%" ? 5 : 15 }}
+          >
+            {icon && icon}
+          </span>
+          <Typography
+            color="textPrimary"
+            style={{ fontSize: fontSize || "130%", marginTop: 3 }}
+          >
+            {text}
+          </Typography>
         </Flexbox>
+      </Button>
+    </ListItem>
+  );
+};
+
+const Menu = observer((props: { game: Game }) => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { theme } = useThemeSetter();
+  return (
+    <>
+      <Title {...{ isMenuOpen, setIsMenuOpen }} />
+      <Drawer
+        anchor="left"
+        open={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+      >
         <Flexbox
           style={{
-            color: theme.colors.primary,
-            transform: "rotateZ(180deg)",
-            paddingBottom: 13,
+            flexFlow: "column",
+            alignItems: "center",
+            overflow: "hidden",
+            height: "100vh",
+            backgroundColor: theme.palette.background.paper,
           }}
         >
-          <h1>Linegame</h1>
-        </Flexbox>
-      </Flexbox>
-      {expanded && (
-        <Flexbox
-          onClick={() => {
-            setExpanded(false);
-            updateOverlay();
-          }}
-          style={{
-            flexDirection: "column",
-          }}
-        >
-          <Flexbox>
-            <Flexbox style={{ flexGrow: 1 }}>
-              <hr
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  border: `2px solid ${theme.colors.primary}`,
-                  display: "flex",
-                  flexGrow: 1,
-                }}
-              />
-            </Flexbox>
-            <Flexbox>&#x25B2;</Flexbox>
-          </Flexbox>
-          <Flexbox>
-            <Flexbox>
-              <MenuButton onClick={() => loadGame()}>Load</MenuButton>
-            </Flexbox>
-            <Flexbox>
-              <MenuButton onClick={() => saveGame()}>Save</MenuButton>
-            </Flexbox>
-            <Flexbox>
-              <MenuButton onClick={() => newGame()}>New game</MenuButton>
-            </Flexbox>
-            <Flexbox
-              style={{
-                justifySelf: "end",
-                marginLeft: "auto",
-                marginRight: 25,
-                flexFlow: "column",
-              }}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-              }}
-            >
-              <Flexbox
-                style={{
-                  fontSize: "70%",
-                  opacity: 0.8,
-                  paddingLeft: 12,
-                  paddingTop: 5,
-                }}
-              >
-                Theme
-              </Flexbox>
-              <Flexbox style={{}}>
-                <a style={themeButtonStyle} onClick={() => setPreviousTheme()}>
-                  &laquo;
-                </a>
-                <span style={{ flexGrow: 1 }}>{theme.name}</span>
-                <a style={themeButtonStyle} onClick={() => setNextTheme()}>
-                  &raquo;
-                </a>
-              </Flexbox>
-              {/* <select
-                style={{
-                  color: theme.colors.success,
-                  background: theme.colors.primary,
-                  borderRadius: theme.dimensions?.borderRadius || 0,
-                }}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setTheme(themes[e.target.value]);
-                }}
-              >
-                {Object.entries(themes).map(([id, theme], idx) => {
-                  return <option value={id}>{theme.name}</option>;
-                })}
-              </select> */}
-            </Flexbox>
-          </Flexbox>
-          <Flexbox style={{ paddingBottom: 20 }}>
-            <Flexbox style={{ flexGrow: 1 }}>
-              <MenuButton onClick={() => decreaseLogLevel()}>
-                LogLevel-- ({Log.minLevel})
-              </MenuButton>
-            </Flexbox>
-            <Flexbox style={{ flexGrow: 1 }}>
-              <MenuButton onClick={() => props.game.lines.pop()}>
-                Undo &laquo;
-              </MenuButton>
-            </Flexbox>
-            <Flexbox>
-              <MenuButton onClick={() => loadGame()}>How to Play</MenuButton>
-            </Flexbox>
-          </Flexbox>
-        </Flexbox>
-      )}
-      {!expanded && (
-        <Flexbox
-          onClick={() => {
-            setExpanded(true);
-            updateOverlay();
-          }}
-        >
-          <Flexbox style={{ flexGrow: 1 }}>
-            <hr
-              style={{
-                border: `2px solid ${theme.colors.primary}`,
-                backgroundColor: theme.colors.primary,
-                display: "flex",
-                flexGrow: 1,
-              }}
+          <MenuList
+            style={{
+              marginTop: "auto",
+              marginBottom: "auto",
+              width: 300,
+              height: 550,
+              backgroundColor: theme.palette.background.paper,
+              color: "#fff",
+              textAlign: "center",
+            }}
+          >
+            <ListItem>
+              <ThemeSelector />
+            </ListItem>
+            <Divider style={{ margin: "2px 10px" }} />
+            <MenuLinkItem
+              text="New game"
+              icon={<NewGameIcon fontSize="large" />}
+              onClick={() => newGame()}
             />
-          </Flexbox>
-          <Flexbox>&#x25BC;</Flexbox>
+            <MenuLinkItem
+              text="Save game"
+              icon={<SaveGameIcon fontSize="large" />}
+              onClick={() => saveGame()}
+            />
+            <MenuLinkItem
+              text="Load game"
+              icon={
+                <LoadGameIcon fontSize="large" onClick={() => loadGame()} />
+              }
+            />
+            <Divider style={{ margin: "2px 10px" }} />
+            <MenuLinkItem
+              text="How to play?"
+              fontSize="100%"
+              icon={<InstructionsIcon fontSize="default" onClick={() => {}} />}
+            />
+          </MenuList>
         </Flexbox>
-      )}
-      <Flexbox>Points: {props.game.lineCount}</Flexbox>
-    </Flexbox>
+      </Drawer>
+    </>
   );
 });
 

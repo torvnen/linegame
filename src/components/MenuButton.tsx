@@ -1,19 +1,19 @@
 import React, { HTMLProps } from "react";
-import { useTheme } from "../hooks/useTheme";
+import { useThemeSetter } from "../hooks/useThemeSetter";
 
 const MenuButton = (props: HTMLProps<HTMLButtonElement>) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeSetter();
   const [hovering, setHovering] = React.useState<boolean>(false);
   return (
     <button
       style={{
         minHeight: 40,
         margin: "10px 5px",
-        color: theme.colors.success,
-        background: hovering ? theme.colors.secondary : theme.colors.primary,
-        borderRadius: theme.dimensions?.borderRadius || 0,
+        color: theme.palette.text.secondary,
+        background: hovering ? theme.palette.primary.main : theme.palette.secondary.main,
+        borderRadius: theme.spacing(1),
         border: `1px solid ${
-          hovering ? theme.colors.primary : theme.colors.secondary
+          hovering ? theme.palette.secondary.main : theme.palette.primary.main
         }`,
         cursor: "pointer",
       }}
