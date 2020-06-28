@@ -1,9 +1,4 @@
-import {
-  Direction,
-  dissectDirection,
-  coordsToString,
-  directionToString,
-} from "./Direction";
+import { Direction, dissectDirection, directionToString } from "./Direction";
 import Coords from "./Coords";
 import { BOARD_MATRIX_SIZE } from "./constants";
 import log from "./Log";

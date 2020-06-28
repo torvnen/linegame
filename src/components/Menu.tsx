@@ -8,9 +8,30 @@ import { updateOverlay } from "./LineOverlay";
 import Flexbox from "./Flexbox";
 import MenuButton from "./MenuButton";
 
+const themeButtonStyle: React.CSSProperties = {
+  fontSize: "120%",
+  cursor: "pointer",
+  margin: "-2px 2px 0 2px",
+};
 const Menu = observer((props: { game: Game }) => {
   const { themes, theme, setTheme } = useTheme();
   const [expanded, setExpanded] = React.useState<boolean>(false);
+  const currentThemeIndex = Object.values(themes).indexOf(theme);
+  const themeKeys = Object.keys(themes);
+  const setPreviousTheme = () => {
+    const previousKey =
+      themeKeys[
+        currentThemeIndex > 0 ? currentThemeIndex - 1 : themeKeys.length - 1
+      ];
+    setTheme(themes[previousKey]);
+  };
+  const setNextTheme = () => {
+    const previousKey =
+      themeKeys[
+        currentThemeIndex + 1 < themeKeys.length ? currentThemeIndex + 1 : 0
+      ];
+    setTheme(themes[previousKey]);
+  };
   return (
     <Flexbox
       style={{
@@ -46,7 +67,14 @@ const Menu = observer((props: { game: Game }) => {
         >
           <Flexbox>
             <Flexbox style={{ flexGrow: 1 }}>
-              <hr style={{ height: 2, display: "flex", flexGrow: 1 }} />
+              <hr
+                style={{
+                  backgroundColor: theme.colors.primary,
+                  border: `2px solid ${theme.colors.primary}`,
+                  display: "flex",
+                  flexGrow: 1,
+                }}
+              />
             </Flexbox>
             <Flexbox>&#x25B2;</Flexbox>
           </Flexbox>
@@ -60,15 +88,41 @@ const Menu = observer((props: { game: Game }) => {
             <Flexbox>
               <MenuButton onClick={() => newGame()}>New game</MenuButton>
             </Flexbox>
-            <Flexbox>
-              <select
+            <Flexbox
+              style={{
+                justifySelf: "end",
+                marginLeft: "auto",
+                marginRight: 25,
+                flexFlow: "column",
+              }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+              }}
+            >
+              <Flexbox
+                style={{
+                  fontSize: "70%",
+                  opacity: 0.8,
+                  paddingLeft: 12,
+                  paddingTop: 5,
+                }}
+              >
+                Theme
+              </Flexbox>
+              <Flexbox style={{}}>
+                <a style={themeButtonStyle} onClick={() => setPreviousTheme()}>
+                  &laquo;
+                </a>
+                <span style={{ flexGrow: 1 }}>{theme.name}</span>
+                <a style={themeButtonStyle} onClick={() => setNextTheme()}>
+                  &raquo;
+                </a>
+              </Flexbox>
+              {/* <select
                 style={{
                   color: theme.colors.success,
                   background: theme.colors.primary,
                   borderRadius: theme.dimensions?.borderRadius || 0,
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
                 }}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setTheme(themes[e.target.value]);
@@ -77,7 +131,7 @@ const Menu = observer((props: { game: Game }) => {
                 {Object.entries(themes).map(([id, theme], idx) => {
                   return <option value={id}>{theme.name}</option>;
                 })}
-              </select>
+              </select> */}
             </Flexbox>
           </Flexbox>
           <Flexbox style={{ paddingBottom: 20 }}>
@@ -105,7 +159,14 @@ const Menu = observer((props: { game: Game }) => {
           }}
         >
           <Flexbox style={{ flexGrow: 1 }}>
-            <hr style={{ height: 2, display: "flex", flexGrow: 1 }} />
+            <hr
+              style={{
+                border: `2px solid ${theme.colors.primary}`,
+                backgroundColor: theme.colors.primary,
+                display: "flex",
+                flexGrow: 1,
+              }}
+            />
           </Flexbox>
           <Flexbox>&#x25BC;</Flexbox>
         </Flexbox>
