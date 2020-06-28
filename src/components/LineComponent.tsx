@@ -2,14 +2,14 @@ import React, { CSSProperties } from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import { LineModel } from "../classes/Line";
-import { useThemeSetter } from "../hooks/useThemeSetter";
+import { useThemeSelector } from "../hooks/useThemeSelector";
 
 export const LINE_THICKNESS = 3;
 const LINE_OPACITY = 0.75;
 export const LineComponent = observer((props: LineComponentProps) => {
   const { model } = props;
   const { dimensions } = model;
-  const { theme } = useThemeSetter();
+  const { theme } = useThemeSelector();
   return (
     <div
       style={{

@@ -1,6 +1,6 @@
 import React from "react";
 import Flexbox from "./Flexbox";
-import { useThemeSetter } from "../hooks/useThemeSetter";
+import { useThemeSelector } from "../hooks/useThemeSelector";
 import IconButton from "@material-ui/core/IconButton";
 import Drawer from "@material-ui/core/Drawer";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -13,7 +13,7 @@ const Title = (props: {
   isMenuOpen: boolean;
   setIsMenuOpen: (is: boolean) => void;
 }) => {
-  const { theme } = useThemeSetter();
+  const { theme } = useThemeSelector();
   const { isMenuOpen, setIsMenuOpen } = props;
   return (
     <>
@@ -25,7 +25,7 @@ const Title = (props: {
         </Flexbox>
         <Flexbox>
           <IconButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {!isMenuOpen && <MenuIcon />}
+            {!isMenuOpen && <MenuIcon color="action" />}
             {isMenuOpen && <MenuOpenIcon />}
           </IconButton>
         </Flexbox>

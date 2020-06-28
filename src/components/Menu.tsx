@@ -6,7 +6,7 @@ import Title from "./Title";
 import MenuList from "@material-ui/core/MenuList";
 import ListItem from "@material-ui/core/ListItem";
 import ThemeSelector from "./ThemeSelector";
-import { useThemeSetter } from "../hooks/useThemeSetter";
+import { useThemeSelector } from "../hooks/useThemeSelector";
 import Flexbox from "./Flexbox";
 import SaveGameIcon from "@material-ui/icons/SaveTwoTone";
 import NewGameIcon from "@material-ui/icons/NoteAddTwoTone";
@@ -47,10 +47,11 @@ const MenuLinkItem = (props: {
 
 const Menu = observer((props: { game: Game }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { theme } = useThemeSetter();
+  const { theme } = useThemeSelector();
   return (
     <>
       <Title {...{ isMenuOpen, setIsMenuOpen }} />
+      <Typography>Points: {props.game.lineCount}</Typography>
       <Drawer
         anchor="left"
         open={isMenuOpen}
@@ -83,17 +84,29 @@ const Menu = observer((props: { game: Game }) => {
             <MenuLinkItem
               text="New game"
               icon={<NewGameIcon fontSize="large" />}
-              onClick={() => newGame()}
+              onClick={() => {
+                newGame();
+                setIsMenuOpen(false);
+              }}
             />
             <MenuLinkItem
               text="Save game"
               icon={<SaveGameIcon fontSize="large" />}
-              onClick={() => saveGame()}
+              onClick={() => {
+                saveGame();
+                setIsMenuOpen(false);
+              }}
             />
             <MenuLinkItem
               text="Load game"
               icon={
-                <LoadGameIcon fontSize="large" onClick={() => loadGame()} />
+                <LoadGameIcon
+                  fontSize="large"
+                  onClick={() => {
+                    loadGame();
+                    setIsMenuOpen(false);
+                  }}
+                />
               }
             />
             <Divider style={{ margin: "2px 10px" }} />

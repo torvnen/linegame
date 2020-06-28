@@ -8959,6 +8959,11 @@ react-scripts@3.4.1:
   optionalDependencies:
     fsevents "2.1.2"
 
+react-singleton-hook@^3.0.140:
+  version "3.0.140"
+  resolved "https://registry.yarnpkg.com/react-singleton-hook/-/react-singleton-hook-3.0.140.tgz#4cea72986543372d95a9352a78c5feed81a30cbc"
+  integrity sha512-j8pCiQesihBd+Ynt5Jd1gWnojorClevASgja1G4iI9wdSnP/FUHTfhykp75tU9OsbkRUusTONTRS1ghWub12JQ==
+
 react-transition-group@^4.4.0:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-4.4.1.tgz#63868f9325a38ea5ee9535d828327f85773345c9"

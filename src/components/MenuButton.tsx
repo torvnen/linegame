@@ -1,8 +1,8 @@
 import React, { HTMLProps } from "react";
-import { useThemeSetter } from "../hooks/useThemeSetter";
+import { useThemeSelector } from "../hooks/useThemeSelector";
 
 const MenuButton = (props: HTMLProps<HTMLButtonElement>) => {
-  const { theme } = useThemeSetter();
+  const { theme } = useThemeSelector();
   const [hovering, setHovering] = React.useState<boolean>(false);
   return (
     <button
@@ -10,7 +10,9 @@ const MenuButton = (props: HTMLProps<HTMLButtonElement>) => {
         minHeight: 40,
         margin: "10px 5px",
         color: theme.palette.text.secondary,
-        background: hovering ? theme.palette.primary.main : theme.palette.secondary.main,
+        background: hovering
+          ? theme.palette.primary.main
+          : theme.palette.secondary.main,
         borderRadius: theme.spacing(1),
         border: `1px solid ${
           hovering ? theme.palette.secondary.main : theme.palette.primary.main

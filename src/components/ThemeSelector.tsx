@@ -1,7 +1,7 @@
 import React from "react";
 import Flexbox from "./Flexbox";
 import { themes } from "../mui-themes";
-import { useThemeSetter } from "../hooks/useThemeSetter";
+import { useThemeSelector } from "../hooks/useThemeSelector";
 
 const themeButtonStyle: React.CSSProperties = {
   fontSize: "140%",
@@ -12,7 +12,7 @@ const themeButtonStyle: React.CSSProperties = {
 };
 
 const ThemeSelector = () => {
-  const { theme, setTheme } = useThemeSetter();
+  const { theme, setTheme } = useThemeSelector();
   const currentThemeIndex = Object.values(themes).indexOf(theme);
   const themeKeys = Object.keys(themes);
   const setPreviousTheme = () => {
