@@ -4,13 +4,16 @@ import Game from "../classes/Game";
 import { LineModel } from "../classes/Line";
 import { LineComponent } from "./LineComponent";
 import { useWindowSize } from "../hooks/useWindowSize";
-
+let updateCallback = () => {};
+export const updateOverlay = () => updateCallback();
 export const LineOverlayComponent = observer(
   (props: LineOverlayComponentProps) => {
     const { game, tableRef } = props;
     const { lines } = game;
     const [style, setStyle] = React.useState<CSSProperties>({});
-    const size = useWindowSize();
+    const windowSize = useWindowSize();
+    const [updateId, setUpdateId] = React.useState(0);
+    updateCallback = () => setUpdateId(updateId + 1);
     React.useEffect(() => {
       setStyle({
         width: tableRef?.current?.offsetWidth,
@@ -18,7 +21,8 @@ export const LineOverlayComponent = observer(
         left: tableRef?.current?.offsetLeft,
         top: tableRef?.current?.offsetTop,
       });
-    }, [tableRef, tableRef.current, size]);
+      console.log("set style");
+    }, [tableRef, tableRef.current, windowSize, updateId]);
     return (
       <div
         style={{

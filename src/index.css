@@ -11,8 +11,13 @@
 * {
   font-family: DMMonoLight;
 }
+#root,
+#root > * {
+  height: 100vh;
+}
 table * {
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
 h1 {
@@ -47,57 +52,6 @@ code {
 }
 .cell:hover {
   box-shadow: inset 0px 0px 1px 1px #666;
-}
-.line-vertical {
-  background-image: url("img/line_vertical.png");
-}
-.line-horizontal {
-  background-image: url("img/line_horizontal.png");
-}
-.line-right-down {
-  background-image: url("img/line_right_down.png");
-}
-.line-right-up {
-  background-image: url("img/line_right_up.png");
-}
-.line-right-down.line-right-up {
-  background-image: url("img/line_right_down.png"), url("img/line_right_up.png");
-}
-.line-right-down.line-horizontal {
-  background-image: url("img/line_right_down.png"),
-    url("img/line_horizontal.png");
-}
-.line-right-down.line-vertical {
-  background-image: url("img/line_right_down.png"), url("img/line_vertical.png");
-}
-.line-right-up.line-horizontal {
-  background-image: url("img/line_right_up.png"), url("img/line_horizontal.png");
-}
-.line-right-up.line-vertical {
-  background-image: url("img/line_right_up.png"), url("img/line_vertical.png");
-}
-.line-horizontal.line-vertical {
-  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png");
-}
-.line-horizontal.line-vertical.line-right-down {
-  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
-    url("img/line_right_down.png");
-}
-.line-horizontal.line-right-down.line-right-up {
-  background-image: url("img/line_horizontal.png"), url("img/line_right_up.png"),
-    url("img/line_right_down.png");
-}
-.line-horizontal.line-vertical.line-right-up {
-  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
-    url("img/line_right_up.png");
-}
-.line-vertical.line-right-up.line-right-down {
-  background-image: url("img/line_right_down.png"), url("img/line_vertical.png"),
-    url("img/line_right_up.png");
-}
-.line-horizontal.line-vertical.line-right-down.line-right-up {
-  background-image: url("img/line_horizontal.png"), url("img/line_vertical.png"),
-    url("img/line_right_down.png"), url("img/line_right_up.png");
 }
 @keyframes grow {
   from {

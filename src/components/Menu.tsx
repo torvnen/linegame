@@ -3,16 +3,39 @@ import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import Log, { decreaseLogLevel } from "../classes/Log";
 import { newGame, saveGame, loadGame } from "../App";
+import { useTheme } from "../hooks/useTheme";
+import { updateOverlay } from "./LineOverlay";
+import Flexbox from "./Flexbox";
 
-const buttonStyle = { minHeight: 40, margin: "10px 5px" };
-const Flexbox = (props: HTMLProps<HTMLDivElement>) => {
+const MenuButton = (
+  props: { onClick?: () => void } & HTMLProps<HTMLButtonElement>
+) => {
+  const theme = useTheme();
+  const [hovering, setHovering] = React.useState<boolean>(false);
   return (
-    <div {...props} style={{ display: "flex", ...props.style }}>
+    <button
+      style={{
+        minHeight: 40,
+        margin: "10px 5px",
+        color: theme.colors.success,
+        background: hovering ? theme.colors.secondary : theme.colors.primary,
+        borderRadius: theme.dimensions?.borderRadius || 0,
+        border: `1px solid ${
+          hovering ? theme.colors.primary : theme.colors.secondary
+        }`,
+        cursor: "pointer",
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onClick={props.onClick}
+    >
       {props.children}
-    </div>
+    </button>
   );
 };
 const Menu = observer((props: { game: Game }) => {
+  const theme = useTheme();
+  const [expanded, setExpanded] = React.useState<boolean>(false);
   return (
     <Flexbox
       style={{
@@ -24,46 +47,75 @@ const Menu = observer((props: { game: Game }) => {
     >
       <Flexbox style={{ padding: "10px 25px 0 25px" }}>
         <Flexbox style={{ flexGrow: 1 }}>
+          <h1 style={{ color: theme.colors.primary }}>Linegame</h1>
+        </Flexbox>
+        <Flexbox
+          style={{
+            color: theme.colors.primary,
+            transform: "rotateZ(180deg)",
+            paddingBottom: 13,
+          }}
+        >
           <h1>Linegame</h1>
         </Flexbox>
-        <Flexbox style={{ transform: "rotateZ(180deg)", paddingBottom: 13 }}>
-          <h1>Linegame</h1>
-        </Flexbox>
       </Flexbox>
-      <Flexbox>
-        <Flexbox>
-          <button style={buttonStyle} onClick={() => loadGame()}>
-            Load
-          </button>
+      {expanded && (
+        <Flexbox
+          onClick={() => {
+            setExpanded(false);
+            updateOverlay();
+          }}
+          style={{
+            flexDirection: "column",
+          }}
+        >
+          <Flexbox>
+            <Flexbox style={{ flexGrow: 1 }}>
+              <hr style={{ height: 2, display: "flex", flexGrow: 1 }} />
+            </Flexbox>
+            <Flexbox>&#x25B2;</Flexbox>
+          </Flexbox>
+          <Flexbox>
+            <Flexbox>
+              <MenuButton onClick={() => loadGame()}>Load</MenuButton>
+            </Flexbox>
+            <Flexbox>
+              <MenuButton onClick={() => saveGame()}>Save</MenuButton>
+            </Flexbox>
+            <Flexbox>
+              <MenuButton onClick={() => newGame()}>New game</MenuButton>
+            </Flexbox>
+          </Flexbox>
+          <Flexbox style={{ paddingBottom: 20 }}>
+            <Flexbox style={{ flexGrow: 1 }}>
+              <MenuButton onClick={() => decreaseLogLevel()}>
+                LogLevel-- ({Log.minLevel})
+              </MenuButton>
+            </Flexbox>
+            <Flexbox style={{ flexGrow: 1 }}>
+              <MenuButton onClick={() => props.game.lines.pop()}>
+                Undo &laquo;
+              </MenuButton>
+            </Flexbox>
+            <Flexbox>
+              <MenuButton onClick={() => loadGame()}>How to Play</MenuButton>
+            </Flexbox>
+          </Flexbox>
         </Flexbox>
-        <Flexbox>
-          <button style={buttonStyle} onClick={() => saveGame()}>
-            Save
-          </button>
+      )}
+      {!expanded && (
+        <Flexbox
+          onClick={() => {
+            setExpanded(true);
+            updateOverlay();
+          }}
+        >
+          <Flexbox style={{ flexGrow: 1 }}>
+            <hr style={{ height: 2, display: "flex", flexGrow: 1 }} />
+          </Flexbox>
+          <Flexbox>&#x25BC;</Flexbox>
         </Flexbox>
-        <Flexbox>
-          <button style={buttonStyle} onClick={() => newGame()}>
-            New game
-          </button>
-        </Flexbox>
-      </Flexbox>
-      <Flexbox style={{ paddingBottom: 20 }}>
-        <Flexbox style={{ flexGrow: 1 }}>
-          <button style={buttonStyle} onClick={() => decreaseLogLevel()}>
-            LogLevel-- ({Log.minLevel})
-          </button>
-        </Flexbox>
-        <Flexbox style={{ flexGrow: 1 }}>
-          <button style={buttonStyle} onClick={() => props.game.lines.pop()}>
-            Undo &laquo;
-          </button>
-        </Flexbox>
-        <Flexbox>
-          <button style={buttonStyle} onClick={() => loadGame()}>
-            How to Play
-          </button>
-        </Flexbox>
-      </Flexbox>
+      )}
       <Flexbox>Points: {props.game.lineCount}</Flexbox>
     </Flexbox>
   );
