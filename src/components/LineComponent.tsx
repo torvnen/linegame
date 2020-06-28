@@ -2,13 +2,14 @@ import React, { CSSProperties } from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import { LineModel } from "../classes/Line";
+import { useTheme } from "../hooks/useTheme";
 
 export const LINE_THICKNESS = 3;
 const LINE_OPACITY = 0.75;
 export const LineComponent = observer((props: LineComponentProps) => {
-  const { game, model } = props;
-  const { lines } = game;
+  const { model } = props;
   const { dimensions } = model;
+  const { theme } = useTheme();
   return (
     <div
       style={{
@@ -27,7 +28,7 @@ export const LineComponent = observer((props: LineComponentProps) => {
           opacity: LINE_OPACITY,
           animationDuration: "1s",
           animationTimingFunction: "cubiz-bezier(0, 20, 50, 90)",
-          background: "green",
+          background: theme.colors.primary,
           height: LINE_THICKNESS,
         }}
       ></div>

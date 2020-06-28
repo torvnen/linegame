@@ -1,14 +1,9 @@
 import React, { CSSProperties } from "react";
 import Coords from "../classes/Coords";
-import {
-  initialCellCoords,
-  getClassNamesForLineDirections,
-} from "../classes/utils";
 import { CELL_SIZE } from "../classes/constants";
-import { decorate, observe, autorun } from "mobx";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
-import { Direction } from "../classes/Direction";
+import { Theme, useTheme } from "../hooks/useTheme";
 
 function isCellSelected(props: CellComponentProps): boolean {
   const selectedCellCoords = props.game?.selectedCellCoords;
@@ -21,22 +16,25 @@ const makeStyle = (
   isSelected: Boolean,
   isOpened: Boolean,
   isHighlighted: Boolean,
-  isEndOfLine: Boolean
+  isEndOfLine: Boolean,
+  theme: Theme
 ): CSSProperties => {
   return {
     width: CELL_SIZE,
     height: CELL_SIZE,
     fontSize: isOpened || isSelected ? 14 : 12,
     textAlign: "center",
+    color: isHighlighted ? theme.colors.success : theme.colors.primary,
     backgroundColor: isEndOfLine
-      ? "rgb(90, 190, 150)"
+      ? theme.colors.secondary
       : isSelected && !isHighlighted
-      ? "red"
+      ? theme.colors.warning
       : isSelected && isHighlighted
-      ? "rgb(103, 230, 123)"
+      ? theme.colors.primary
       : isHighlighted
-      ? "rgb(90, 190, 150)"
+      ? theme.colors.secondary
       : "#f9f9f9",
+    backgroundSize: "50%",
   };
 };
 
@@ -50,20 +48,20 @@ export const CellComponent = observer((props: CellComponentProps) => {
   );
   const isEndOfLine =
     isHighlighted && game.endOfLineCoords.some((c) => c.x === x && c.y === y);
+  const { theme } = useTheme();
   React.useEffect(() => {
     if (!!cell) cell.tdRef = tdRef;
   }, [game, coords, x, y]);
   return (
     <td
       ref={tdRef}
-      className={`noselect cell ${
-        "TODO" || getClassNamesForLineDirections(cell!.lineDirections)
-      }`}
+      className={`noselect cell`}
       style={makeStyle(
         isCellSelected(props),
         cell!.isOpened,
         isHighlighted,
-        isEndOfLine
+        isEndOfLine,
+        theme
       )}
       onClick={() => {
         if (

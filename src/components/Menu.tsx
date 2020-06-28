@@ -6,35 +6,10 @@ import { newGame, saveGame, loadGame } from "../App";
 import { useTheme } from "../hooks/useTheme";
 import { updateOverlay } from "./LineOverlay";
 import Flexbox from "./Flexbox";
+import MenuButton from "./MenuButton";
 
-const MenuButton = (
-  props: { onClick?: () => void } & HTMLProps<HTMLButtonElement>
-) => {
-  const theme = useTheme();
-  const [hovering, setHovering] = React.useState<boolean>(false);
-  return (
-    <button
-      style={{
-        minHeight: 40,
-        margin: "10px 5px",
-        color: theme.colors.success,
-        background: hovering ? theme.colors.secondary : theme.colors.primary,
-        borderRadius: theme.dimensions?.borderRadius || 0,
-        border: `1px solid ${
-          hovering ? theme.colors.primary : theme.colors.secondary
-        }`,
-        cursor: "pointer",
-      }}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
-  );
-};
 const Menu = observer((props: { game: Game }) => {
-  const theme = useTheme();
+  const { themes, theme, setTheme } = useTheme();
   const [expanded, setExpanded] = React.useState<boolean>(false);
   return (
     <Flexbox
@@ -84,6 +59,25 @@ const Menu = observer((props: { game: Game }) => {
             </Flexbox>
             <Flexbox>
               <MenuButton onClick={() => newGame()}>New game</MenuButton>
+            </Flexbox>
+            <Flexbox>
+              <select
+                style={{
+                  color: theme.colors.success,
+                  background: theme.colors.primary,
+                  borderRadius: theme.dimensions?.borderRadius || 0,
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  setTheme(themes[e.target.value]);
+                }}
+              >
+                {Object.entries(themes).map(([id, theme], idx) => {
+                  return <option value={id}>{theme.name}</option>;
+                })}
+              </select>
             </Flexbox>
           </Flexbox>
           <Flexbox style={{ paddingBottom: 20 }}>

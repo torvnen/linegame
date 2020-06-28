@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 
 export interface Theme {
   name: string;
@@ -6,9 +7,9 @@ export interface Theme {
     primary: string;
     secondary: string;
     success: string;
-    warning?: string;
+    info: string;
+    warning: string;
     error?: string;
-    info?: string;
   };
   dimensions?: {
     borderRadius?: number | string;
@@ -23,10 +24,12 @@ export const themes: { [id: string]: Theme } = {
       primary: "#204051",
       secondary: "#3b6978",
       success: "#e7dfd5",
+      info: "#84a9ac",
+      warning: "#e5e4cc",
     },
     dimensions: {
-        borderRadius: 8
-    }
+      borderRadius: 8,
+    },
   },
   "166695": {
     name: "Green Desert",
@@ -35,11 +38,16 @@ export const themes: { [id: string]: Theme } = {
       secondary: "#889e81",
       success: "#e5e4cc",
       info: "#bac7a7",
+      warning: "#e5e4cc",
     },
   },
 };
-
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(themes["default"]);
-  return theme;
+
+  return {
+    theme,
+    setTheme,
+    themes,
+  };
 }

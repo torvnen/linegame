@@ -19,7 +19,7 @@ const style: CSSProperties = {
 export const Board = observer((props: { game: Game }) => {
   const { game } = props;
   const tableRef = React.useRef<HTMLTableElement>(null);
-  const theme = useTheme();
+  const { theme } = useTheme();
   // React.useEffect(() => {
   //   autorun(() => {
   //     console.debug("highlightedCoords: ", game.highlightedCoords);
@@ -36,7 +36,14 @@ export const Board = observer((props: { game: Game }) => {
         border: `1px solid ${theme.colors.primary}`,
       }}
     >
-      <Flexbox style={{ flexFlow: "column", margin: 'auto', padding: 5, background: theme.colors.success }}>
+      <Flexbox
+        style={{
+          flexFlow: "column",
+          margin: "auto",
+          padding: 5,
+          background: theme.colors.success,
+        }}
+      >
         <Menu game={game} />
         <table ref={tableRef} cellSpacing={1} style={style}>
           <tbody>
