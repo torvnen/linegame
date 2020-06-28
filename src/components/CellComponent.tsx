@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import { useThemeSelector } from "../hooks/useThemeSelector";
 import { Theme } from "@material-ui/core/styles";
+import Color from "color";
 
 function isCellSelected(props: CellComponentProps): boolean {
   const selectedCellCoords = props.game?.selectedCellCoords;
@@ -26,8 +27,8 @@ const makeStyle = (
     fontSize: isOpened || isSelected ? 14 : 12,
     textAlign: "center",
     color: isHighlighted
-      ? theme.palette.primary.dark
-      : theme.palette.primary.main,
+      ? Color(theme.palette.primary.dark).darken(0.2).hex()
+      : Color(theme.palette.primary.main).darken(0.2).hex(),
     backgroundColor: isEndOfLine
       ? theme.palette.primary.light
       : isSelected && !isHighlighted
