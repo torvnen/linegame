@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "87ebe79f072e395118be473fed60924f",
+    "revision": "06b1d6b8f827df5712f20a5cbe62f54b",
     "url": "/LineGame/index.html"
   },
   {
-    "revision": "6a5ddedc3a2efe9b050a",
+    "revision": "5e89991730f3babf1780",
     "url": "/LineGame/static/css/main.989c714a.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/LineGame/static/js/2.d238c687.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "6a5ddedc3a2efe9b050a",
-    "url": "/LineGame/static/js/main.4be5ff86.chunk.js"
+    "revision": "5e89991730f3babf1780",
+    "url": "/LineGame/static/js/main.ccae261b.chunk.js"
   },
   {
     "revision": "92a6f5d38b370ca5ad60",
