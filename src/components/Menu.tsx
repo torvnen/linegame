@@ -25,7 +25,7 @@ const MenuLinkItem = (props: {
 }) => {
   const { icon, onClick, text, fontSize } = props;
   return (
-    <ListItem {...onClick} style={{ cursor: "pointer" }}>
+    <ListItem onClick={onClick} style={{ cursor: "pointer" }}>
       <Button fullWidth>
         <Flexbox style={{ width: "70%" }}>
           <span
@@ -99,15 +99,12 @@ const Menu = observer((props: { game: Game }) => {
             />
             <MenuLinkItem
               text="Load game"
-              icon={
-                <LoadGameIcon
-                  fontSize="large"
-                  onClick={() => {
-                    loadGame();
-                    setIsMenuOpen(false);
-                  }}
-                />
-              }
+              icon={<LoadGameIcon fontSize="large" />}
+              onClick={() => {
+                loadGame().then((isSuccess) => {
+                  setIsMenuOpen(false);
+                });
+              }}
             />
             <Divider style={{ margin: "2px 10px" }} />
             <MenuLinkItem

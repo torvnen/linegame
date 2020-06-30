@@ -10,7 +10,7 @@ import { decorate, observable, computed, autorun } from "mobx";
 import { allDirections, coordsToString, directionToString } from "./Direction";
 import Cell from "./Cell";
 import log, { LogLevel, decreaseLogLevel, setLogLevel } from "../classes/Log";
-import { LineModel } from "./Line";
+import { LineModel } from "./LineModel";
 import { loadGame } from "../App";
 
 class Game {

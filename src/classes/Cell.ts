@@ -18,6 +18,7 @@ Cell.prototype.toString = function (): string {
 decorate(Cell, {
   isOpened: observable,
   lineDirections: observable,
+  tdRef: observable,
 });
 
 export default Cell;

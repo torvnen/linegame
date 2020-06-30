@@ -55,7 +55,7 @@ export const CellComponent = observer((props: CellComponentProps) => {
   const { theme } = useThemeSelector();
   React.useEffect(() => {
     if (!!cell) cell.tdRef = tdRef;
-  }, [game, coords, x, y]);
+  }, [game, coords, x, y, cell]);
   return (
     <td
       ref={tdRef}

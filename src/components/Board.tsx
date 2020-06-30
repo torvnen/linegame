@@ -1,10 +1,7 @@
 import React, { CSSProperties } from "react";
 import Game from "../classes/Game";
-import { initialGameGrid } from "../classes/utils";
-import { CellComponent } from "./CellComponent";
 import { BOARD_MATRIX_SIZE, CELL_SIZE } from "../classes/constants";
 import { Row } from "./Row";
-import { autorun } from "mobx";
 import { observer } from "mobx-react";
 import Menu from "./Menu";
 import { LineOverlayComponent } from "./LineOverlay";

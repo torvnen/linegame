@@ -16,12 +16,15 @@ class LineModel {
       ? `0 100%`
       : undefined;
   }
-  get dimensions(): {
-    offsetX: number;
-    offsetY: number;
-    lengthPx: number;
-    rotationDeg: number;
-  } {
+  get dimensions():
+    | {
+        offsetX: number;
+        offsetY: number;
+        lengthPx: number;
+        rotationDeg: number;
+      }
+    | undefined {
+    if (!this.firstCell?.tdRef || !this.lastCell?.tdRef) return undefined;
     const dd = dissectDirection(this.direction);
     const firstTd = this.firstCell!.tdRef!.current!;
     const lastTd = this.lastCell!.tdRef!.current!;
@@ -45,8 +48,12 @@ class LineModel {
         firstTd.offsetLeft +
         cellWidth / 2 +
         LINE_THICKNESS / (dd.isUp ? 2 : -2);
-      offsetY = firstTd.offsetTop + cellHeight * (dd.isDown ? 0.2 : 0.8) - LINE_THICKNESS;
-      const endY = lastTd.offsetTop + cellHeight * (dd.isUp ? 0.2 : 0.8) - LINE_THICKNESS;
+      offsetY =
+        firstTd.offsetTop +
+        cellHeight * (dd.isDown ? 0.2 : 0.8) -
+        LINE_THICKNESS;
+      const endY =
+        lastTd.offsetTop + cellHeight * (dd.isUp ? 0.2 : 0.8) - LINE_THICKNESS;
       lengthPx = Math.abs(endY - offsetY);
     } else if (dd.isDiagonal) {
       const endX = lastTd.offsetLeft + (dd.isLeft ? 0 : cellWidth);

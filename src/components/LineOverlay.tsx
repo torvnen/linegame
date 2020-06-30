@@ -1,7 +1,7 @@
 import React, { CSSProperties } from "react";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
-import { LineModel } from "../classes/Line";
+import { LineModel } from "../classes/LineModel";
 import { LineComponent } from "./LineComponent";
 import { useWindowSize } from "../hooks/useWindowSize";
 let updateCallback = () => {};
