@@ -17,7 +17,7 @@ const Title = (props: {
   const { isMenuOpen, setIsMenuOpen } = props;
   return (
     <>
-      <Flexbox style={{ padding: "10px 25px" }}>
+      <Flexbox style={{ padding: "0 25px" }}>
         <Flexbox style={{ flexGrow: 1 }}>
           <h1 style={{ color: theme.palette.text.primary, paddingBottom: 5 }}>
             Linegame

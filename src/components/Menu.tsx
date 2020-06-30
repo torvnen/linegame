@@ -8,6 +8,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ThemeSelector from "./ThemeSelector";
 import { useThemeSelector } from "../hooks/useThemeSelector";
 import Flexbox from "./Flexbox";
+import UndoIcon from "@material-ui/icons/Undo";
 import SaveGameIcon from "@material-ui/icons/SaveTwoTone";
 import NewGameIcon from "@material-ui/icons/NoteAddTwoTone";
 import LoadGameIcon from "@material-ui/icons/RestorePageTwoTone";
@@ -15,7 +16,7 @@ import InstructionsIcon from "@material-ui/icons/InfoTwoTone";
 import { saveGame, newGame, loadGame } from "../App";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import { Divider } from "@material-ui/core";
+import { Divider, IconButton } from "@material-ui/core";
 
 const MenuLinkItem = (props: {
   onClick?: () => void;
@@ -51,7 +52,14 @@ const Menu = observer((props: { game: Game }) => {
   return (
     <>
       <Title {...{ isMenuOpen, setIsMenuOpen }} />
-      <Typography>Points: {props.game.lineCount}</Typography>
+      <Flexbox style={{padding: '0 25px'}}>
+        <Typography style={{ display: "flex", flexGrow: 1, padding: '10px 0' }}>
+          Points: {props.game.lineCount}
+        </Typography>
+        <IconButton onClick={() => props.game.lines.pop()}>
+          <UndoIcon />
+        </IconButton>
+      </Flexbox>
       <Drawer
         anchor="left"
         open={isMenuOpen}
