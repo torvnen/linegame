@@ -53,7 +53,7 @@ const Menu = observer((props: { game: Game }) => {
     <>
       <Title {...{ isMenuOpen, setIsMenuOpen }} />
       <Flexbox style={{padding: '0 25px'}}>
-        <Typography style={{ display: "flex", flexGrow: 1, padding: '10px 0' }}>
+        <Typography color="textPrimary" style={{ display: "flex", flexGrow: 1, padding: '10px 0' }}>
           Points: {props.game.lineCount}
         </Typography>
         <IconButton onClick={() => props.game.lines.pop()}>

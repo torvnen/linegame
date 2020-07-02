@@ -9,9 +9,9 @@ import { RowProps } from "../components/Row";
 import { decorate, observable, computed, autorun } from "mobx";
 import { allDirections, coordsToString, directionToString } from "./Direction";
 import Cell from "./Cell";
-import log, { LogLevel, decreaseLogLevel, setLogLevel } from "../classes/Log";
+import log, { LogLevel, setLogLevel } from "../classes/Log";
 import { LineModel } from "./LineModel";
-import { loadGame } from "../App";
+import { updateOverlay } from "../components/LineOverlay";
 
 class Game {
   static readonly origo = { x: 0, y: 0 };
@@ -53,6 +53,8 @@ class Game {
         this.cells.push(new Cell({ x, y }));
 
     this.initiateBoardAsync().then(() => {
+      // Ensure overlay position after initializing board
+      updateOverlay();
       let previousLineCount = 0;
       autorun(() => {
         // As {this.lines} is a MobX observable,
@@ -155,7 +157,7 @@ class Game {
         coordsToString(c1),
         coordsToString(c2)
       );
-      const line = this.getLineForCoords(c1, c2)!;
+      const line = this.getLineForCoords(c2)!;
       for (const { x, y } of line.coords) {
         const c = this.cellAt(x, y);
         if (!c!.isOpened) {
@@ -173,7 +175,7 @@ class Game {
       log.d("Reset selected cell coords.");
     }
   }
-  getLineForCoords(c1: Coords, c2: Coords): LineModel | undefined {
+  getLineForCoords(c2: Coords): LineModel | undefined {
     return this.possibleLines.find((l) =>
       l.coords.some((c) => coordsAreEqual(c, c2))
     );

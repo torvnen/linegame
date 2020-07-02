@@ -1,6 +1,5 @@
 import React, { CSSProperties } from "react";
 import Coords from "../classes/Coords";
-import { CELL_SIZE } from "../classes/constants";
 import { observer } from "mobx-react";
 import Game from "../classes/Game";
 import { useThemeSelector } from "../hooks/useThemeSelector";
@@ -14,37 +13,9 @@ function isCellSelected(props: CellComponentProps): boolean {
     selectedCellCoords?.y === props.coords.y
   );
 }
-const makeStyle = (
-  isSelected: Boolean,
-  isOpened: Boolean,
-  isHighlighted: Boolean,
-  isEndOfLine: Boolean,
-  theme: Theme
-): CSSProperties => {
-  return {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    fontSize: isOpened || isSelected ? 14 : 12,
-    textAlign: "center",
-    color: isHighlighted
-      ? Color(theme.palette.primary.dark).darken(0.2).hex()
-      : Color(theme.palette.primary.main).darken(0.2).hex(),
-    backgroundColor: isEndOfLine
-      ? theme.palette.primary.light
-      : isSelected && !isHighlighted
-      ? theme.palette.error.light
-      : isSelected && isHighlighted
-      ? theme.palette.info.main
-      : isHighlighted
-      ? theme.palette.secondary.light
-      : "#f9f9f9",
-    backgroundSize: "50%",
-  };
-};
-
 export const CellComponent = observer((props: CellComponentProps) => {
   const tdRef = React.useRef<HTMLTableCellElement>(null);
-  const { game, coords } = props;
+  const { game, coords, cellSize } = props;
   const { x, y } = props.coords;
   const cell = props.game.cellAt(x, y);
   const isHighlighted = props.game.highlightedCoords.some(
@@ -56,17 +27,28 @@ export const CellComponent = observer((props: CellComponentProps) => {
   React.useEffect(() => {
     if (!!cell) cell.tdRef = tdRef;
   }, [game, coords, x, y, cell]);
+  const isSelected = isCellSelected(props);
+  console.log('cellSize', cellSize)
   return (
     <td
       ref={tdRef}
       className={`noselect cell`}
-      style={makeStyle(
-        isCellSelected(props),
-        cell!.isOpened,
-        isHighlighted,
-        isEndOfLine,
-        theme
-      )}
+      style={{
+        width: cellSize,
+        height: cellSize,
+        color: isHighlighted
+          ? Color(theme.palette.primary.dark).darken(0.2).hex()
+          : Color(theme.palette.primary.main).darken(0.2).hex(),
+        backgroundColor: isEndOfLine
+          ? theme.palette.primary.light
+          : isSelected && !isHighlighted
+          ? theme.palette.error.light
+          : isSelected && isHighlighted
+          ? theme.palette.info.main
+          : isHighlighted
+          ? theme.palette.secondary.light
+          : "#f9f9f9",
+      }}
       onClick={() => {
         if (
           props.game.selectedCellCoords?.x === x &&
@@ -88,4 +70,5 @@ export const CellComponent = observer((props: CellComponentProps) => {
 export interface CellComponentProps {
   coords: Coords;
   game: Game;
+  cellSize: number;
 }

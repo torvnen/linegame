@@ -7,7 +7,12 @@ export const Row = (props: RowProps) => {
   return (
     <tr>
       {props.cells.map((cell) => (
-        <CellComponent game={props.game} key={cell.coords.x} {...cell} />
+        <CellComponent
+          cellSize={props.cellSize!}
+          game={props.game}
+          key={cell.coords.x}
+          {...cell}
+        />
       ))}
     </tr>
   );
@@ -17,4 +22,5 @@ export interface RowProps {
   yIndex: number;
   game: Game;
   cells: Array<Cell>;
+  cellSize?: number;
 }

@@ -1,22 +1,33 @@
 import React, { CSSProperties } from "react";
 import Game from "../classes/Game";
-import { BOARD_MATRIX_SIZE, CELL_SIZE } from "../classes/constants";
+import { BOARD_MATRIX_SIZE } from "../classes/constants";
 import { Row } from "./Row";
 import { observer } from "mobx-react";
 import Menu from "./Menu";
-import { LineOverlayComponent } from "./LineOverlay";
+import { LineOverlayComponent, updateOverlay } from "./LineOverlay";
 import { useThemeSelector } from "../hooks/useThemeSelector";
 import Flexbox from "./Flexbox";
-
-const style: CSSProperties = {
-  width: BOARD_MATRIX_SIZE * CELL_SIZE,
-  margin: "auto",
-};
+import { useWindowSize } from "../hooks/useWindowSize";
 
 export const Board = observer((props: { game: Game }) => {
   const { game } = props;
   const tableRef = React.useRef<HTMLTableElement>(null);
   const { theme } = useThemeSelector();
+  const windowSize = useWindowSize();
+  const sizeConstraint = Math.min(windowSize.height!, windowSize.width!);
+  const frameWidthTotal = 20;
+  const maxCellSize = 25;
+  const cellSize = Math.min(
+    Math.floor((sizeConstraint - frameWidthTotal) / BOARD_MATRIX_SIZE),
+    maxCellSize
+  );
+  React.useEffect(() => {
+    updateOverlay();
+  }, [windowSize]);
+  const style: CSSProperties = {
+    width: BOARD_MATRIX_SIZE * cellSize,
+    margin: "auto",
+  };
   return (
     <Flexbox
       style={{
@@ -40,7 +51,7 @@ export const Board = observer((props: { game: Game }) => {
         <table ref={tableRef} cellSpacing={1} style={style}>
           <tbody>
             {game.rows.map((row) => (
-              <Row game={game} key={row.yIndex} {...row} />
+              <Row game={game} key={row.yIndex} {...row} cellSize={cellSize} />
             ))}
           </tbody>
         </table>

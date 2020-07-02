@@ -13,7 +13,8 @@
 }
 #root,
 #root > * {
-  height: 100vh;
+  height: 100%;
+  min-height: 100vh;
 }
 table * {
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
@@ -49,6 +50,8 @@ code {
 .cell {
   background-position: center;
   background-size: 110%;
+  font-size: 12px;
+  text-align: center;
 }
 .cell:hover {
   box-shadow: inset 0px 0px 1px 1px #666;
