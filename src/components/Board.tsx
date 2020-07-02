@@ -8,6 +8,7 @@ import { LineOverlayComponent, updateOverlay } from "./LineOverlay";
 import { useThemeSelector } from "../hooks/useThemeSelector";
 import Flexbox from "./Flexbox";
 import { useWindowSize } from "../hooks/useWindowSize";
+import HowToPlay from "./HowToPlay";
 
 export const Board = observer((props: { game: Game }) => {
   const { game } = props;
@@ -28,6 +29,7 @@ export const Board = observer((props: { game: Game }) => {
     width: BOARD_MATRIX_SIZE * cellSize,
     margin: "auto",
   };
+  const [isHowToPlayOpen, setIsHowToPlayOpen] = React.useState(false);
   return (
     <Flexbox
       style={{
@@ -47,7 +49,8 @@ export const Board = observer((props: { game: Game }) => {
           background: theme.palette.background.paper,
         }}
       >
-        <Menu game={game} />
+        <Menu game={game} openHowToPlay={() => setIsHowToPlayOpen(true)} />
+        <HowToPlay isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
         <table ref={tableRef} cellSpacing={1} style={style}>
           <tbody>
             {game.rows.map((row) => (

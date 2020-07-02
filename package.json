@@ -1,7 +1,7 @@
 {
   "name": "v2",
   "version": "0.1.0",
-  "homepage": "https://torvnen.github.io/LineGame",
+  "homepage": "https://torvnen.github.io/linegame",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.10.2",

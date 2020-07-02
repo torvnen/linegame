@@ -46,14 +46,17 @@ const MenuLinkItem = (props: {
   );
 };
 
-const Menu = observer((props: { game: Game }) => {
+const Menu = observer((props: { game: Game; openHowToPlay: () => any }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { theme } = useThemeSelector();
   return (
     <>
       <Title {...{ isMenuOpen, setIsMenuOpen }} />
-      <Flexbox style={{padding: '0 25px'}}>
-        <Typography color="textPrimary" style={{ display: "flex", flexGrow: 1, padding: '10px 0' }}>
+      <Flexbox style={{ padding: "0 25px" }}>
+        <Typography
+          color="textPrimary"
+          style={{ display: "flex", flexGrow: 1, padding: "10px 0" }}
+        >
           Points: {props.game.lineCount}
         </Typography>
         <IconButton onClick={() => props.game.lines.pop()}>
@@ -116,6 +119,10 @@ const Menu = observer((props: { game: Game }) => {
             />
             <Divider style={{ margin: "2px 10px" }} />
             <MenuLinkItem
+              onClick={() => {
+                setIsMenuOpen(false);
+                props.openHowToPlay();
+              }}
               text="How to play?"
               fontSize="100%"
               icon={<InstructionsIcon fontSize="default" onClick={() => {}} />}
