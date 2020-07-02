@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "d021236ff6bc2bf48cb388419854ae2c",
+    "revision": "31db62f454bc50bc7a1f11eb1f8b50c7",
     "url": "/linegame/index.html"
   },
   {
-    "revision": "40ac1c066e2e84e15178",
+    "revision": "752098bb80c4edd54456",
     "url": "/linegame/static/css/main.9da754b0.chunk.css"
   },
   {
-    "revision": "657c57896b3cca43e5f3",
-    "url": "/linegame/static/js/2.37f6514c.chunk.js"
+    "revision": "426d7f07980a9a020a84",
+    "url": "/linegame/static/js/2.e1b60a83.chunk.js"
   },
   {
     "revision": "882fee5ad56cfd78b1cc5d94b617aa42",
-    "url": "/linegame/static/js/2.37f6514c.chunk.js.LICENSE.txt"
+    "url": "/linegame/static/js/2.e1b60a83.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "40ac1c066e2e84e15178",
-    "url": "/linegame/static/js/main.96b65d81.chunk.js"
+    "revision": "752098bb80c4edd54456",
+    "url": "/linegame/static/js/main.7ec13242.chunk.js"
   },
   {
     "revision": "344be263ff75303519df",
@@ -30,5 +30,9 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "5701846e8683c78b137d971d095fb75f",
     "url": "/linegame/static/media/DMMono-MediumItalic.5701846e.ttf"
+  },
+  {
+    "revision": "262817d25df8f86b299258e5506fcdfe",
+    "url": "/linegame/static/media/possible_lines_example.262817d2.png"
   }
 ]);
