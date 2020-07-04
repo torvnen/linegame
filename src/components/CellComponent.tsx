@@ -28,7 +28,7 @@ export const CellComponent = observer((props: CellComponentProps) => {
     if (!!cell) cell.tdRef = tdRef;
   }, [game, coords, x, y, cell]);
   const isSelected = isCellSelected(props);
-  console.log('cellSize', cellSize)
+  console.log("cellSize", cellSize);
   return (
     <td
       ref={tdRef}
@@ -39,6 +39,8 @@ export const CellComponent = observer((props: CellComponentProps) => {
         color: isHighlighted
           ? Color(theme.palette.primary.dark).darken(0.2).hex()
           : Color(theme.palette.primary.main).darken(0.2).hex(),
+        fontSize: cell?.isOpened ? 15 : 12,
+        fontWeight: cell?.isOpened ? 700 : 300,
         backgroundColor: isEndOfLine
           ? theme.palette.primary.light
           : isSelected && !isHighlighted
