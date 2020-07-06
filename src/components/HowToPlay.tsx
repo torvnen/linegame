@@ -26,7 +26,9 @@ const HowToPlay = (props: { isOpen: boolean; onClose: () => any }) => {
     Math.min(windowSize.width!, windowSize.height!),
     maxWidth
   );
-  return (
+  return !props.isOpen ? (
+    <></>
+  ) : (
     <Dialog
       open={props.isOpen}
       TransitionComponent={React.forwardRef((props, ref) => (
